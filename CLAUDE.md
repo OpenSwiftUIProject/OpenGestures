@@ -2,7 +2,7 @@
 
 ## Overview
 
-OpenGestures is an open-source reimplementation of Apple's Gestures.framework (iOS 26+).
+OpenGestures is an open-source reimplementation of Apple's Gestures.framework.
 
 ## Development Workflow
 
