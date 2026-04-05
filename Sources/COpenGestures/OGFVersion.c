@@ -1,4 +1,4 @@
 #include "include/OpenGestures/OGFVersion.h"
 
-double OpenGesturesVersionNumber = 1.0;
-const unsigned char OpenGesturesVersionString[] = "1.0.0";
+double OpenGesturesVersionNumber = 9126.1;
+const unsigned char OpenGesturesVersionString[] = "9126.1.5";
