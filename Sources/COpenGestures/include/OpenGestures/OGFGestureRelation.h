@@ -1,26 +1,27 @@
 //
 //  OGFGestureRelation.h
 //  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
 
 #ifndef OGFGestureRelation_h
 #define OGFGestureRelation_h
 
 #include <OpenGestures/OGFBase.h>
 
-OGF_EXTERN_C_BEGIN
+typedef OGF_ENUM(NSInteger, OGFGestureRelationType) {
+    OGFGestureRelationTypeCanExclude = 0,
+    OGFGestureRelationTypeCanBeExcluded = 1,
+    OGFGestureRelationTypeCanExcludeActive = 2,
+    OGFGestureRelationTypeCanBeExcludedWhenActive = 3,
+    OGFGestureRelationTypeRequiresFailure = 4,
+    OGFGestureRelationTypeRequiredToFail = 5,
+};
 
-/// Gesture relation type.
-/// rawValue 0: canExclude, 1: canBeExcluded, 2: failureRequirement, 4: requires, 5: requiredBy
-typedef struct OGFGestureRelationType {
-    NSInteger rawValue;
-} OGFGestureRelationType;
-
-/// Gesture relation role.
-/// rawValue 0: regular, 1: blocking
-typedef struct OGFGestureRelationRole {
-    NSInteger rawValue;
-} OGFGestureRelationRole;
-
-OGF_EXTERN_C_END
+typedef OGF_ENUM(NSInteger, OGFGestureRelationRole) {
+    OGFGestureRelationRoleRegular = 0,
+    OGFGestureRelationRoleBlocking = 1,
+};
 
 #endif /* OGFGestureRelation_h */

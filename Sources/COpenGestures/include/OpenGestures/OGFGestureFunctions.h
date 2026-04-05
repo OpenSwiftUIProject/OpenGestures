@@ -31,7 +31,7 @@ OGF_EXPORT void OGFGestureComponentControllerSetNode(
 );
 
 /// Check if a gesture failure type is terminated.
-OGF_EXPORT bool OGFGestureFailureTypeIsTerminated(struct OGFGesturePhase phase);
+OGF_EXPORT bool OGFGestureFailureTypeIsTerminated(OGFGesturePhase phase);
 
 /// Get the default value for a gesture node.
 OGF_EXPORT id _Nullable OGFGestureNodeDefaultValue(void);

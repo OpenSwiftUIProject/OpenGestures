@@ -1,6 +1,9 @@
 //
 //  OGFGestureNodeDelegate.h
 //  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
 
 #ifndef OGFGestureNodeDelegate_h
 #define OGFGestureNodeDelegate_h
@@ -18,14 +21,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol OGFGestureNodeDelegate <NSObject>
 
+@required
+
+- (void)gestureNode:(id)gestureNode didUpdatePhase:(OGFGesturePhase)didUpdatePhase;
+- (id)gestureNode:(id)gestureNode roleForRelationType:(OGFGestureRelationType)relationType relatedNode:(id)relatedNode;
+- (BOOL)gestureNodeShouldActivate:(id)gestureNodeShouldActivate;
+- (void)gestureNodeWillUnblock:(id)gestureNodeWillUnblock;
+
 @optional
-- (BOOL)gestureNodeShouldActivate:(id<OGFGestureNode>)node;
-- (void)gestureNodeWillUnblock:(id<OGFGestureNode>)node;
-- (void)gestureNode:(id<OGFGestureNode>)node didEnqueuePhase:(struct OGFGesturePhase)phase;
-- (void)gestureNode:(id<OGFGestureNode>)node didUpdatePhase:(struct OGFGesturePhase)phase;
-- (struct OGFGestureRelationRole)gestureNode:(id<OGFGestureNode>)node
-                       roleForRelationType:(struct OGFGestureRelationType)type
-                               relatedNode:(id<OGFGestureNode>)relatedNode;
+
+- (void)gestureNode:(id)gestureNode didEnqueuePhase:(OGFGesturePhase)didEnqueuePhase;
+- (void)gestureNodeWillAbort:(id)gestureNodeWillAbort;
 
 @end
 

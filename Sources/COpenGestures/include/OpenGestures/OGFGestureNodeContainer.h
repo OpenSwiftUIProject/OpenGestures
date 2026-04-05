@@ -1,6 +1,9 @@
 //
 //  OGFGestureNodeContainer.h
 //  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
 
 #ifndef OGFGestureNodeContainer_h
 #define OGFGestureNodeContainer_h
@@ -16,11 +19,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol OGFGestureNodeContainer <NSObject>
 
-- (NSInteger)indexOfGestureNode:(id<OGFGestureNode>)node;
-- (BOOL)isDescendantOfContainer:(id<OGFGestureNodeContainer>)container
-                  referenceNode:(id<OGFGestureNode>)node;
-- (BOOL)isDeeperThanContainer:(id<OGFGestureNodeContainer>)container
-                referenceNode:(id<OGFGestureNode>)node;
+@required
+
+- (NSInteger)indexOfGestureNode:(id)gestureNode;
+- (BOOL)isDeeperThanContainer:(id)isDeeperThanContainer referenceNode:(id)referenceNode;
+- (BOOL)isDescendantOfContainer:(id)container referenceNode:(id)referenceNode;
 
 @end
 

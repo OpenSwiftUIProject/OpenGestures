@@ -1,6 +1,9 @@
 //
 //  OGFGestureNodeCoordinator.h
 //  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
 
 #ifndef OGFGestureNodeCoordinator_h
 #define OGFGestureNodeCoordinator_h
@@ -16,20 +19,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol OGFGestureNodeCoordinator <NSObject>
 
-@property (nonatomic, readonly) NSArray<id<OGFGestureNode>> *nodes;
-@property (nonatomic, copy, nullable) void (^willUpdateHandler)(void);
-@property (nonatomic, copy, nullable) void (^didUpdateHandler)(void);
-@property (nonatomic, copy, nullable) void (^willProcessUpdateQueueHandler)(void);
+@required
 
-- (void)enqueueUpdatesForNodes:(NSArray<id<OGFGestureNode>> *)nodes
-                       inBlock:(void (^)(NSArray<id<OGFGestureNode>> *))block
-                        reason:(NSString *)reason;
-- (void)processUpdatesWithReason:(NSString *)reason;
-- (void)updateWithNodes:(NSArray<id<OGFGestureNode>> *)nodes
-                 reason:(NSString *)reason
-          updateHandler:(void (^)(NSArray<id<OGFGestureNode>> *))handler;
-- (NSArray<id<OGFGestureNode>> *)failureDependentsForNode:(id<OGFGestureNode>)node;
-- (BOOL)hasUnresolvedFailureDependenciesForNode:(id<OGFGestureNode>)node;
+@property (nonatomic, readonly) NSArray *nodes;
+@property (nonatomic, copy) id /* block */ willUpdateHandler;
+@property (nonatomic, copy) id /* block */ willProcessUpdateQueueHandler;
+@property (nonatomic, copy) id /* block */ didUpdateHandler;
+
+- (void)enqueueUpdatesForNodes:(id)nodes inBlock:(id /* block */)inBlock reason:(id)reason;
+- (BOOL)hasUnresolvedFailureDependenciesForNode:(id)node;
+- (void)setWillProcessUpdateQueueHandler:(id /* block */)willProcessUpdateQueueHandler;
+- (void)updateWithNodes:(id)nodes reason:(id)reason updateHandler:(id /* block */)updateHandler;
+- (id)failureDependentsForNode:(id)node;
+- (void)processUpdatesWithReason:(id)reason;
+- (void)setDidUpdateHandler:(id /* block */)didUpdateHandler;
+- (void)setWillUpdateHandler:(id /* block */)willUpdateHandler;
 
 @end
 

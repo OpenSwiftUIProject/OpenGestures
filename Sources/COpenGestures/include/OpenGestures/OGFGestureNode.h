@@ -1,6 +1,9 @@
 //
 //  OGFGestureNode.h
 //  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
 
 #ifndef OGFGestureNode_h
 #define OGFGestureNode_h
@@ -20,33 +23,33 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol OGFGestureNode <NSObject>
 
-@property (nonatomic, readonly) struct OGFGesturePhase phase;
-@property (nonatomic, readonly) NSInteger identifier;
-@property (nonatomic, copy, nullable) NSString *tag;
-@property (nonatomic, readonly, getter=isBlocked) BOOL blocked;
+@required
+
+@property (nonatomic, weak) id<OGFGestureNodeDelegate> delegate;
+@property (nonatomic, weak) id<OGFGestureNodeContainer> container;
+@property (nonatomic) id<OGFGestureNodeCoordinator> coordinator;
+@property (nonatomic, readonly) OGFGesturePhase phase;
+@property (nonatomic, getter=isBlocked, readonly) BOOL blocked;
+@property (nonatomic, readonly) NSString *identifier;
+@property (nonatomic, copy) NSString *tag;
 @property (nonatomic, getter=isDisabled) BOOL disabled;
-@property (nonatomic, readonly, nullable) NSString *platformKey;
-@property (nonatomic, readonly, nullable) NSNumber *failureReason;
-
-@property (nonatomic, weak, nullable) id<OGFGestureNodeDelegate> delegate;
-@property (nonatomic, weak, nullable) id<OGFGestureNodeContainer> container;
-@property (nonatomic, weak, nullable) id<OGFGestureNodeCoordinator> coordinator;
-
-- (BOOL)updateWithValue:(nullable id)value isFinal:(BOOL)isFinal error:(NSError **)error;
-- (void)ensureUpdated:(NSString *)reason;
-- (BOOL)abort:(NSError **)error;
-- (BOOL)failWithReason:(nullable NSNumber *)reason error:(NSError **)error;
-
-- (void)addRelationWithType:(struct OGFGestureRelationType)type
-                       role:(struct OGFGestureRelationRole)role
-                relatedNode:(id<OGFGestureNode>)node;
-- (void)removeRelationWithType:(struct OGFGestureRelationType)type
-                          role:(struct OGFGestureRelationRole)role
-                   relatedNode:(id<OGFGestureNode>)node;
-
-- (void)setTracking:(BOOL)tracking eventsWithIdentifiers:(NSArray *)identifiers;
-
 @property (nonatomic) BOOL disallowExclusionWithUnresolvedFailureRequirements;
+@property (nonatomic, readonly) NSInteger platformKey;
+@property (nonatomic, readonly) NSError *failureReason;
+
+- (void)setDelegate:(id)delegate;
+- (void)setContainer:(id)container;
+- (void)setCoordinator:(id)coordinator;
+- (void)setTag:(id)tag;
+- (BOOL)abort:(id _Nullable *)abort;
+- (void)addRelationWithType:(OGFGestureRelationType)type role:(OGFGestureRelationRole)role relatedNode:(id)relatedNode;
+- (BOOL)ensureUpdated:(id _Nullable *)ensureUpdated;
+- (BOOL)failWithReason:(id)reason error:(id _Nullable *)error;
+- (void)removeRelationWithType:(OGFGestureRelationType)type role:(OGFGestureRelationRole)role relatedNode:(id)relatedNode;
+- (void)setDisabled:(BOOL)disabled;
+- (void)setDisallowExclusionWithUnresolvedFailureRequirements:(BOOL)unresolvedFailureRequirements;
+- (void)setTracking:(BOOL)tracking eventsWithIdentifiers:(id)identifiers;
+- (BOOL)updateWithValue:(id)value isFinal:(BOOL)isFinal error:(id _Nullable *)error;
 
 @end
 
