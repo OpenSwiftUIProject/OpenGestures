@@ -6,6 +6,7 @@
 #define OGFGestureFunctions_h
 
 #include <OpenGestures/OGFBase.h>
+#include <OpenGestures/OGFGesturePhase.h>
 
 #if OGF_OBJC_FOUNDATION
 #import <Foundation/Foundation.h>
