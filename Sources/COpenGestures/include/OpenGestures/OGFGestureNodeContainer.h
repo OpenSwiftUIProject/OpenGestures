@@ -21,9 +21,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @required
 
-- (NSInteger)indexOfGestureNode:(id)gestureNode;
-- (BOOL)isDeeperThanContainer:(id)isDeeperThanContainer referenceNode:(id)referenceNode;
-- (BOOL)isDescendantOfContainer:(id)container referenceNode:(id)referenceNode;
+- (NSInteger)indexOfGestureNode:(id<OGFGestureNode>)node;
+- (BOOL)isDeeperThanContainer:(id<OGFGestureNodeContainer>)container referenceNode:(id<OGFGestureNode>)referenceNode;
+- (BOOL)isDescendantOfContainer:(id<OGFGestureNodeContainer>)container referenceNode:(id<OGFGestureNode>)referenceNode;
 
 @end
 
