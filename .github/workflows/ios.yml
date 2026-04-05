@@ -1,0 +1,72 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ios_test:
+    name: Execute tests on iOS
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15]
+        xcode-version: ["26.3"]   # Swift 6.2
+        ios-version: ["26.2"]
+        include:
+          - ios-version: "26.2"
+            ios-simulator-name: "iPhone 16 Pro"
+    runs-on: ${{ matrix.os }}
+    env:
+      OPENGESTURES_WERROR: 1
+      OPENGESTURES_USE_LOCAL_DEPS: 1
+      OPENGESTURES_TARGET_RELEASE: 2025
+      DARWINPRIVATEFRAMEWORKS_TARGET_RELEASE: 2025
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Xcode
+        uses: OpenSwiftUIProject/setup-xcode@v2
+        with:
+          xcode-version: ${{ matrix.xcode-version }}
+      - name: Set up build environment
+        run: Scripts/CI/darwin_setup_build.sh
+        shell: bash
+      - name: Build in debug mode on iOS
+        run: |
+          xcodebuild build \
+            -workspace .swiftpm/xcode/package.xcworkspace \
+            -scheme OpenGestures-Package \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,OS=${{ matrix.ios-version }},name=${{ matrix.ios-simulator-name }}" \
+            -derivedDataPath .build-debug \
+            -skipMacroValidation \
+            -skipPackagePluginValidation \
+            OTHER_SWIFT_FLAGS="-warnings-as-errors"
+      - name: Build and run tests in debug mode with coverage on iOS Simulator
+        run: |
+          xcodebuild test \
+            -workspace .swiftpm/xcode/package.xcworkspace \
+            -scheme OpenGestures-Package \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,OS=${{ matrix.ios-version }},name=${{ matrix.ios-simulator-name }}" \
+            -enableCodeCoverage=YES \
+            -derivedDataPath .build-test-debug \
+            -skipPackagePluginValidation \
+            -skipMacroValidation
+      - name: Generate iOS coverage report
+        run: |
+          PROFDATA=$(find .build-test-debug -name "Coverage.profdata" -type f | head -1)
+          XCTEST=$(find .build-test-debug -name "*.xctest" -type d | head -1)
+          if [ -n "$PROFDATA" ] && [ -n "$XCTEST" ]; then
+            BINARY="$XCTEST/$(basename "$XCTEST" .xctest)"
+            xcrun llvm-cov show -instr-profile="$PROFDATA" "$BINARY" > coverage.txt
+          fi
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ios
+          verbose: true

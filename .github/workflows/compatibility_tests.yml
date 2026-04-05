@@ -1,0 +1,47 @@
+name: Compatibility tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  compatibility_tests_macos:
+    name: Execute compatibility tests
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            xcode-version: "26.3"   # Swift 6.2
+    runs-on: ${{ matrix.os }}
+    env:
+      OPENGESTURES_WERROR: 1
+      OPENGESTURES_COMPATIBILITY_TEST: 1
+      OPENGESTURES_USE_LOCAL_DEPS: 1
+      OPENGESTURES_TARGET_RELEASE: 2025
+      DARWINPRIVATEFRAMEWORKS_TARGET_RELEASE: 2025
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Xcode
+        uses: OpenSwiftUIProject/setup-xcode@v2
+        with:
+          xcode-version: ${{ matrix.xcode-version }}
+      - name: Set up build environment
+        run: Scripts/CI/darwin_setup_build.sh
+        shell: bash
+      - name: Run tests against Gestures.framework on macOS via SwiftPM
+        run: |
+          swift test \
+            --build-path .build-compatibility-test-debug
+      - name: Run tests against Gestures.framework on macOS via Xcode
+        run: |
+          xcodebuild test \
+            -workspace .swiftpm/xcode/package.xcworkspace \
+            -scheme OpenGestures-Package \
+            -sdk macosx \
+            -destination "platform=macOS" \
+            -skipPackagePluginValidation \
+            -skipMacroValidation

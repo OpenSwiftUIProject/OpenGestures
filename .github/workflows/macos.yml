@@ -1,0 +1,54 @@
+name: macOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  macos_test:
+    name: Execute tests on macOS
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15]
+        xcode-version: ["26.3"]   # Swift 6.2
+    runs-on: ${{ matrix.os }}
+    env:
+      OPENGESTURES_WERROR: 1
+      OPENGESTURES_USE_LOCAL_DEPS: 1
+      OPENGESTURES_TARGET_RELEASE: 2025
+      DARWINPRIVATEFRAMEWORKS_TARGET_RELEASE: 2025
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Xcode
+        uses: OpenSwiftUIProject/setup-xcode@v2
+        with:
+          xcode-version: ${{ matrix.xcode-version }}
+      - name: Set up build environment
+        run: Scripts/CI/darwin_setup_build.sh
+        shell: bash
+      - name: Build and run tests in debug mode with coverage
+        run: |
+          swift test \
+            -c debug \
+            --enable-code-coverage \
+            --build-path .build-test-debug
+          xcrun llvm-cov show \
+            -instr-profile=.build-test-debug/debug/codecov/default.profdata \
+            .build-test-debug/debug/OpenGesturesPackageTests.xctest/Contents/MacOS/OpenGesturesPackageTests \
+            > coverage.txt
+      - name: Build and run tests in release mode
+        run: |
+          swift test \
+            -c release \
+            --enable-code-coverage \
+            --build-path .build-test-release
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: macos
+          verbose: true

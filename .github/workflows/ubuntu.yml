@@ -1,0 +1,43 @@
+name: Ubuntu
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ubuntu_test:
+    name: Execute tests on Ubuntu
+    runs-on: ubuntu-22.04
+    container: swift:6.2-jammy
+    env:
+      OPENGESTURES_WERROR: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run tests in debug mode with coverage
+        run: |
+          swift test \
+            -c debug \
+            --enable-code-coverage \
+            --build-path .build-test-debug
+          llvm-cov show \
+            -instr-profile=.build-test-debug/debug/codecov/default.profdata \
+            .build-test-debug/debug/OpenGesturesPackageTests.xctest \
+            > coverage.txt
+      - name: Build and run tests in release mode
+        run: |
+          swift test \
+            -c release \
+            --build-path .build-test-release
+      - name: Upload coverage to Codecov
+        run: |
+          apt-get update && apt-get install -y curl gpg
+          curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+          gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
+          chmod +x codecov
+          ./codecov -t ${{ secrets.CODECOV_TOKEN }} -F ubuntu
