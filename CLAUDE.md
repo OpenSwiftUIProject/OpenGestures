@@ -25,9 +25,9 @@ swift test
 
 ## Key Environment Variables
 
-- `OPENGESTURES_TARGET_RELEASE` — Target OS release version (default: 2024)
+- `OPENGESTURES_TARGET_RELEASE` — Target OS release version (default: 2025)
 - `OPENGESTURES_COMPATIBILITY_TEST` — Enable compatibility testing with DarwinPrivateFrameworks
-- `USE_LOCAL_DEPS` — Use local DarwinPrivateFrameworks dependency
+- `OPENGESTURES_USE_LOCAL_DEPS` — Use local DarwinPrivateFrameworks dependency
 
 ## Architecture
 
