@@ -1,0 +1,33 @@
+//
+//  OGFBase.h
+//  OpenGestures
+
+#ifndef OGFBase_h
+#define OGFBase_h
+
+#include <CoreFoundation/CoreFoundation.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "OGFTargetConditionals.h"
+#include "OGFSwiftSupport.h"
+
+#define OGF_ENUM CF_ENUM
+#define OGF_CLOSED_ENUM CF_CLOSED_ENUM
+#define OGF_OPTIONS CF_OPTIONS
+#define OGF_EXTERN_C_BEGIN CF_EXTERN_C_BEGIN
+#define OGF_EXTERN_C_END CF_EXTERN_C_END
+#define OGF_ASSUME_NONNULL_BEGIN CF_ASSUME_NONNULL_BEGIN
+#define OGF_ASSUME_NONNULL_END CF_ASSUME_NONNULL_END
+#define OGF_IMPLICIT_BRIDGING_ENABLED CF_IMPLICIT_BRIDGING_ENABLED
+#define OGF_IMPLICIT_BRIDGING_DISABLED CF_IMPLICIT_BRIDGING_DISABLED
+#define OGF_EXPORT CF_EXPORT
+#define OGF_BRIDGED_TYPE CF_BRIDGED_TYPE
+
+#if OGF_TARGET_OS_DARWIN && __OBJC__
+#define OGF_OBJC_FOUNDATION 1
+#else
+#define OGF_OBJC_FOUNDATION 0
+#endif /* OGF_TARGET_OS_DARWIN && __OBJC__ */
+
+#endif /* OGFBase_h */

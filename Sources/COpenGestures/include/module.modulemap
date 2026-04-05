@@ -1,0 +1,6 @@
+module COpenGestures [system] {
+    umbrella header "OpenGestures/OpenGestures.h"
+
+    export *
+    module * { export * }
+}

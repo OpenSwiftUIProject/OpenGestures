@@ -177,8 +177,15 @@ extension [Platform] {
 
 // MARK: - Targets
 
+let cOpenGesturesTarget = Target.target(
+    name: "COpenGestures"
+)
+
 let openGesturesTarget = Target.target(
     name: "OpenGestures",
+    dependencies: [
+        .target(name: cOpenGesturesTarget.name),
+    ],
     swiftSettings: sharedSwiftSettings
 )
 
@@ -203,9 +210,10 @@ let openGesturesCompatibilityTestsTarget = Target.testTarget(
 let package = Package(
     name: "OpenGestures",
     products: [
-        .library(name: "OpenGestures", targets: ["OpenGestures"]),
+        .library(name: "OpenGestures", targets: ["COpenGestures", "OpenGestures"]),
     ],
     targets: [
+        cOpenGesturesTarget,
         openGesturesTarget,
         openGesturesTestsTarget,
     ]
