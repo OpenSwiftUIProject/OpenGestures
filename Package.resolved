@@ -1,0 +1,15 @@
+{
+  "originHash" : "3285b10886befaf57021412f0039b61d5a78dd9a550de53e7443f8dc57681b6c",
+  "pins" : [
+    {
+      "identity" : "opencoregraphics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/OpenSwiftUIProject/OpenCoreGraphics.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "050239bd42b19a4c8b1ef3936bfb9f3589ecfc46"
+      }
+    }
+  ],
+  "version" : 3
+}

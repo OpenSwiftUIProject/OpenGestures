@@ -139,7 +139,17 @@ let compatibilityTestCondition = envBoolValue("COMPATIBILITY_TEST", default: fal
 let gesturesCondition = envBoolValue("OPENGESTURESSHIMS_GESTURES", default: false)
 let useLocalDeps = envBoolValue("USE_LOCAL_DEPS")
 
+let swiftCorelibsPath = envStringValue("LIB_SWIFT_PATH") ?? "\(Context.packageDirectory)/Sources/SwiftCorelibs/include"
+
 // MARK: - Shared Settings
+
+var sharedCSettings: [CSetting] = []
+sharedCSettings.append(
+    .unsafeFlags(
+        ["-isystem", swiftCorelibsPath],
+        .when(platforms: .nonDarwinPlatforms)
+    )
+)
 
 var sharedSwiftSettings: [SwiftSetting] = [
     .enableUpcomingFeature("InternalImportsByDefault"),
@@ -186,13 +196,15 @@ extension Target {
 // MARK: - Targets
 
 let cOpenGesturesTarget = Target.target(
-    name: "COpenGestures"
+    name: "COpenGestures",
+    cSettings: sharedCSettings
 )
 
 let openGesturesTarget = Target.target(
     name: "OpenGestures",
     dependencies: [
         .target(name: cOpenGesturesTarget.name),
+        .product(name: "OpenCoreGraphicsShims", package: "OpenCoreGraphics"),
     ],
     swiftSettings: sharedSwiftSettings
 )
@@ -221,6 +233,9 @@ let package = Package(
     name: "OpenGestures",
     products: [
         .library(name: "OpenGesturesShims", targets: [openGesturesShimsTarget.name]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/OpenSwiftUIProject/OpenCoreGraphics.git", branch: "main"),
     ],
     targets: [
         cOpenGesturesTarget,

@@ -94,7 +94,7 @@ public final class GestureNodeCoordinator: @unchecked Sendable {
 
     deinit {
         // Clear coordinator back-refs on all managed nodes
-        for node in _nodeRefs {
+        for _ in _nodeRefs {
             // node's coordinator back-ref would be cleared here
         }
     }

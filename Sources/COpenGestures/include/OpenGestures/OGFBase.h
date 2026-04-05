@@ -30,4 +30,9 @@
 #define OGF_OBJC_FOUNDATION 0
 #endif /* OGF_TARGET_OS_DARWIN && __OBJC__ */
 
+#if !OGF_TARGET_OS_DARWIN
+typedef long NSInteger;
+typedef unsigned long NSUInteger;
+#endif
+
 #endif /* OGFBase_h */

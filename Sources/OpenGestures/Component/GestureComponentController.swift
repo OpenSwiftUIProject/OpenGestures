@@ -30,7 +30,7 @@ open class AnyGestureComponentController: @unchecked Sendable {
 // MARK: - GestureComponentController
 
 /// Concrete controller wrapping a specific GestureComponent.
-public final class GestureComponentController<C: GestureComponent>: AnyGestureComponentController {
+public final class GestureComponentController<C: GestureComponent>: AnyGestureComponentController, @unchecked Sendable {
 
     public var component: C
     private let timeSource: any TimeSource
