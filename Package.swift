@@ -243,5 +243,5 @@ if compatibilityTestCondition, buildForDarwinPlatform {
         default: nil
     }
 } else {
-    package.platforms = nil
+    package.platforms = [.iOS(.v18), .macOS(.v15), .macCatalyst(.v18), .tvOS(.v18), .watchOS(.v10), .visionOS(.v2)]
 }
