@@ -1,4 +1,4 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.2
 
 import Foundation
 import PackageDescription
@@ -148,11 +148,6 @@ var sharedSwiftSettings: [SwiftSetting] = [
     .define("OPENGESTURES_RELEASE_\(releaseVersion)"),
 ]
 
-if releaseVersion >= 2021 {
-    for year in 2021 ... releaseVersion {
-        sharedSwiftSettings.append(.define("OPENGESTURES_SUPPORT_\(year)_API"))
-    }
-}
 if warningsAsErrorsCondition {
     sharedSwiftSettings.append(.unsafeFlags(["-warnings-as-errors"]))
 }
@@ -244,9 +239,9 @@ if compatibilityTestCondition, buildForDarwinPlatform {
         envIntValue("TARGET_RELEASE", default: 2025)
     }
     package.platforms = switch gesturesVersion {
-        case 2025: [.iOS(.v18), .macOS(.v15), .macCatalyst(.v18), .tvOS(.v18), .watchOS(.v10), .visionOS(.v2)]
+        case 2025: [.iOS(.v26), .macOS(.v26), .macCatalyst(.v26), .tvOS(.v26), .watchOS(.v26), .visionOS(.v26)]
         default: nil
     }
 } else {
-    package.platforms = [.iOS(.v18), .macOS(.v15), .macCatalyst(.v18), .tvOS(.v18), .watchOS(.v10), .visionOS(.v2)]
+    package.platforms = [.iOS(.v26), .macOS(.v26), .macCatalyst(.v26), .tvOS(.v26), .watchOS(.v26), .visionOS(.v26)]
 }
