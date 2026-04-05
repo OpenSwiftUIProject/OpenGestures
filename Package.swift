@@ -136,6 +136,7 @@ let releaseVersion = envIntValue("TARGET_RELEASE", default: 2025)
 let libraryEvolutionCondition = envBoolValue("LIBRARY_EVOLUTION", default: buildForDarwinPlatform)
 let compatibilityTestCondition = envBoolValue("COMPATIBILITY_TEST", default: false)
 
+let gesturesCondition = envBoolValue("OPENGESTURESSHIMS_GESTURES", default: false)
 let useLocalDeps = envBoolValue("USE_LOCAL_DEPS")
 
 // MARK: - Shared Settings
@@ -148,6 +149,9 @@ var sharedSwiftSettings: [SwiftSetting] = [
     .define("OPENGESTURES_RELEASE_\(releaseVersion)"),
 ]
 
+if development {
+    sharedSwiftSettings.append(.define("OPENGESTURES_DEVELOPMENT"))
+}
 if warningsAsErrorsCondition {
     sharedSwiftSettings.append(.unsafeFlags(["-warnings-as-errors"]))
 }
@@ -167,6 +171,15 @@ extension [Platform] {
     }
     static var nonDarwinPlatforms: [Platform] {
         [.linux, .android, .wasi, .openbsd, .windows]
+    }
+}
+
+extension Target {
+    func addGFSettings() {
+        dependencies.append(.product(name: "Gestures", package: "DarwinPrivateFrameworks"))
+        var swiftSettings = swiftSettings ?? []
+        swiftSettings.append(.define("OPENGESTURES_GESTURES"))
+        self.swiftSettings = swiftSettings
     }
 }
 
@@ -192,11 +205,13 @@ let openGesturesTestsTarget = Target.testTarget(
     swiftSettings: sharedSwiftSettings
 )
 
+let openGesturesShimsTarget = Target.target(
+    name: "OpenGesturesShims",
+    swiftSettings: sharedSwiftSettings
+)
+
 let openGesturesCompatibilityTestsTarget = Target.testTarget(
     name: "OpenGesturesCompatibilityTests",
-    dependencies: [
-        .product(name: "Gestures", package: "DarwinPrivateFrameworks"),
-    ],
     swiftSettings: sharedSwiftSettings
 )
 
@@ -205,12 +220,13 @@ let openGesturesCompatibilityTestsTarget = Target.testTarget(
 let package = Package(
     name: "OpenGestures",
     products: [
-        .library(name: "OpenGestures", targets: ["COpenGestures", "OpenGestures"]),
+        .library(name: "OpenGesturesShims", targets: [openGesturesShimsTarget.name]),
     ],
     targets: [
         cOpenGesturesTarget,
         openGesturesTarget,
         openGesturesTestsTarget,
+        openGesturesShimsTarget,
     ]
 )
 
@@ -231,17 +247,28 @@ func setupDPFDependency() {
     }
 }
 
-if compatibilityTestCondition, buildForDarwinPlatform {
+if gesturesCondition, buildForDarwinPlatform {
     setupDPFDependency()
+    openGesturesShimsTarget.addGFSettings()
+} else {
+    openGesturesShimsTarget.dependencies.append(.target(name: "OpenGestures"))
+
     package.targets.append(openGesturesCompatibilityTestsTarget)
 
-    let gesturesVersion = EnvManager.shared.withDomain("DarwinPrivateFrameworks") {
-        envIntValue("TARGET_RELEASE", default: 2025)
+    if compatibilityTestCondition, buildForDarwinPlatform {
+        setupDPFDependency()
+        openGesturesCompatibilityTestsTarget.addGFSettings()
+
+        let gesturesVersion = EnvManager.shared.withDomain("DarwinPrivateFrameworks") {
+            envIntValue("TARGET_RELEASE", default: 2025)
+        }
+        package.platforms = switch gesturesVersion {
+            case 2025: [.iOS(.v26), .macOS(.v26), .macCatalyst(.v26), .tvOS(.v26), .watchOS(.v26), .visionOS(.v26)]
+            default: nil
+        }
+    } else {
+        openGesturesCompatibilityTestsTarget.dependencies.append(.target(name: "OpenGestures"))
+        openGesturesCompatibilityTestsTarget.swiftSettings?.append(.define("OPENGESTURES"))
+        package.platforms = [.iOS(.v18), .macOS(.v15), .macCatalyst(.v18), .tvOS(.v18), .watchOS(.v10), .visionOS(.v2)]
     }
-    package.platforms = switch gesturesVersion {
-        case 2025: [.iOS(.v26), .macOS(.v26), .macCatalyst(.v26), .tvOS(.v26), .watchOS(.v26), .visionOS(.v26)]
-        default: nil
-    }
-} else {
-    package.platforms = [.iOS(.v18), .macOS(.v15), .macCatalyst(.v18), .tvOS(.v18), .watchOS(.v10), .visionOS(.v2)]
 }
