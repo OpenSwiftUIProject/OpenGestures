@@ -20,7 +20,7 @@ extension TapComponent: CompositeGestureComponent {
     public typealias Value = Upstream.Value
 
     public func traits() -> GestureTraitCollection? {
-        GestureTraitCollection(trait: .tap(tapCount: tapCount))
+        .withTrait(.tap(tapCount: tapCount))
     }
 
     public func update(context: GestureComponentContext) throws -> GestureOutput<Value> {

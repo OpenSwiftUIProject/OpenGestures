@@ -22,7 +22,7 @@ extension PanComponent: CompositeGestureComponent {
     public typealias Value = Upstream.Value
 
     public func traits() -> GestureTraitCollection? {
-        GestureTraitCollection(trait: .pan())
+        .withTrait(.pan())
     }
 
     public func update(context: GestureComponentContext) throws -> GestureOutput<Value> {

@@ -4,7 +4,10 @@
 
 import Testing
 
-struct OGFGestureFailureTypeIsTerminatedTests {
+// MARK: - OGFGestureFunctionsCompatibilityTests
+
+@Suite
+struct OGFGestureFunctionsCompatibilityTests {
     @Test
     func nodeDefaultValue() {
         let value = OGFGestureNodeDefaultValue()
@@ -12,7 +15,7 @@ struct OGFGestureFailureTypeIsTerminatedTests {
     }
 
     @Suite(.enabled(if: compatibilityTestEnabled))
-    struct GestureNodeCreateDefaultTests {
+    struct GestureNodeCreateDefaultCompatibilityTests {
         @Test(arguments: [1, 2])
         func properties(_ key: Int) {
             let _ = OGFGestureNodeCreateDefault(key)
@@ -50,7 +53,7 @@ struct OGFGestureFailureTypeIsTerminatedTests {
     }
 
     @Suite(.enabled(if: compatibilityTestEnabled))
-    struct GestureNodeCoordinatorCreateTests {
+    struct GestureNodeCoordinatorCreateCompatibilityTests {
         @Test
         func createCoordinatorWithNilHandlers() {
             let coordinator = OGFGestureNodeCoordinatorCreate(nil, nil)

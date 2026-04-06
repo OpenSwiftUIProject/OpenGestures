@@ -18,7 +18,7 @@ extension LongPressComponent: CompositeGestureComponent {
     public typealias Value = Upstream.Value
 
     public func traits() -> GestureTraitCollection? {
-        GestureTraitCollection(trait: .longPress(
+        .withTrait(.longPress(
             pointCount: pointCount,
             minimumDuration: minimumDuration,
             maximumMovement: maximumMovement

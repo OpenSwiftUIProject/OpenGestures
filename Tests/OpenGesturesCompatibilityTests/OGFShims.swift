@@ -3,10 +3,15 @@
 //  OpenGesturesCompatibilityTests
 
 #if OPENGESTURES
-@_exported import OpenGestures
+@_exported public import OpenGestures
+
 let compatibilityTestEnabled = false
 #else
 @_exported public import Gestures
+#if os(iOS) && !targetEnvironment(simulator)
+@_exported public import _GesturesDeviceSwiftShims
+#endif
+
 public typealias OGFGesturePhase = GFGesturePhase
 public typealias OGFGestureRelationType = GFGestureRelationType
 public typealias OGFGestureRelationRole = GFGestureRelationRole
