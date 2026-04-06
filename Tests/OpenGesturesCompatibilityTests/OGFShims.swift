@@ -9,7 +9,7 @@ let compatibilityTestEnabled = false
 #else
 @_exported public import Gestures
 #if os(iOS) && !targetEnvironment(simulator)
-public import _GesturesDeviceSwiftShims
+@_exported public import _GesturesDeviceSwiftShims
 #endif
 
 public typealias OGFGesturePhase = GFGesturePhase
