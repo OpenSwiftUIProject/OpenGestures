@@ -37,18 +37,18 @@ open class AnyGestureNode: Hashable, Identifiable, @unchecked Sendable {
 
     // MARK: - Relations
 
-    private var _relations: [GestureRelation] = []
+    package var relationMap = RelationMap()
 
     public var relations: [GestureRelation] {
-        _relations
+        relationMap.toRelations()
     }
 
     open func addRelation(_ relation: GestureRelation) {
-        _relations.append(relation)
+        relationMap.addRelation(relation)
     }
 
     open func removeRelation(_ relation: GestureRelation) {
-        // TODO: Equatable-based removal
+        relationMap.removeRelation(relation)
     }
 
     open func addRelations(_ relations: [GestureRelation]) {
