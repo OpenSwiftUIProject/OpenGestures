@@ -3,7 +3,7 @@
 //  OpenGestures
 //
 //  Audited for 9126.1.5
-//  Status: WIP
+//  Status: Complete
 
 #ifndef OGFGestureFunctions_h
 #define OGFGestureFunctions_h
@@ -13,9 +13,8 @@
 
 #if OGF_OBJC_FOUNDATION
 #import <Foundation/Foundation.h>
-
-@protocol OGFGestureNode;
-@protocol OGFGestureNodeCoordinator;
+@protocol GFGestureNode;
+@protocol GFGestureNodeCoordinator;
 #endif
 
 OGF_EXTERN_C_BEGIN
@@ -45,7 +44,7 @@ OGF_EXPORT void OGFGestureComponentControllerSetNode(
 #endif /* OGF_OBJC_FOUNDATION */
 
 /// Check if a gesture failure type is terminated.
-OGF_EXPORT bool OGFGestureFailureTypeIsTerminated(OGFGestureFailureType type) OGF_SWIFT_NAME(getter:OGFGestureFailureType.isTerminated(self:));
+OGF_EXPORT bool OGFGestureFailureTypeIsTerminated(OGFGestureFailureType type);
 
 OGF_ASSUME_NONNULL_END
 

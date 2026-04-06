@@ -11,5 +11,12 @@ public typealias OGFGesturePhase = GFGesturePhase
 public typealias OGFGestureRelationType = GFGestureRelationType
 public typealias OGFGestureRelationRole = GFGestureRelationRole
 public typealias OGFGestureFailureType = GFGestureFailureType
+
+public let OGFGestureNodeCreateDefault = GFGestureNodeCreateDefault
+public let OGFGestureNodeDefaultValue = GFGestureNodeDefaultValue
+public let OGFGestureNodeCoordinatorCreate = GFGestureNodeCoordinatorCreate
+public let OGFGestureComponentControllerSetNode = GFGestureComponentControllerSetNode
+public let OGFGestureFailureTypeIsTerminated = GFGestureFailureTypeIsTerminated
+
 public let compatibilityTestEnabled = true
 #endif

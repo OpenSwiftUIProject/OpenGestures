@@ -7,48 +7,36 @@
 
 #if canImport(ObjectiveC)
 
-// MARK: - OGFGestureNodeCreateDefault
+@_cdecl("OGFGestureNodeDefaultValue")
+public func ogfGestureNodeDefaultValue() -> Any {
+    ()
+}
 
 @_cdecl("OGFGestureNodeCreateDefault")
-package func _OGFGestureNodeCreateDefault(_ key: Int) -> AnyObject {
+public func ogfGestureNodeCreateDefault(key: Int) -> any OGFGestureNode {
     // TODO: Create AnyGestureNodeShim with key
-    fatalError("TODO")
+    preconditionFailure("")
 }
-
-// MARK: - OGFGestureNodeCoordinatorCreate
 
 @_cdecl("OGFGestureNodeCoordinatorCreate")
-package func _OGFGestureNodeCoordinatorCreate(
+public func ogfGestureNodeCoordinatorCreate(
     _ willUpdateHandler: (() -> Void)?,
     _ didUpdateHandler: (() -> Void)?
-) -> AnyObject {
+) -> any OGFGestureNodeCoordinator {
     // TODO: Create GestureNodeCoordinatorShim
-    fatalError("TODO")
+    preconditionFailure("")
 }
-
-// MARK: - OGFGestureComponentControllerSetNode
 
 @_cdecl("OGFGestureComponentControllerSetNode")
-package func _OGFGestureComponentControllerSetNode(
+public func ogfGestureComponentControllerSetNode(
     _ controller: AnyObject,
-    _ node: AnyObject?
+    _ node: (any OGFGestureNode)?
 ) {
-    guard let ctrl = controller as? AnyGestureComponentController else { return }
-    // TODO: Extract AnyGestureNode from the ObjC shim node and assign
-    _ = ctrl
-    _ = node
-}
-
-// MARK: - OGFGestureNodeDefaultValue
-
-@_cdecl("OGFGestureNodeDefaultValue")
-package func _OGFGestureNodeDefaultValue() -> AnyObject? {
-    () as AnyObject
+    guard let _ = controller as? AnyGestureComponentController else { return }
+    preconditionFailure("")
 }
 
 #endif
-
-// MARK: - OGFGestureFailureTypeIsTerminated
 
 @_cdecl("OGFGestureFailureTypeIsTerminated")
 public func ogfGestureFailureTypeIsTerminated(
