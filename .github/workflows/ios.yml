@@ -12,44 +12,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15]
+        os: [macos-26]
         xcode-version: ["26.3"]   # Swift 6.2
         ios-version: ["26.2"]
         include:
           - ios-version: "26.2"
-            ios-simulator-name: "iPhone 16 Pro"
+            ios-simulator-name: "iPhone 17 Pro"
     runs-on: ${{ matrix.os }}
     env:
       OPENGESTURES_WERROR: 1
-      OPENGESTURES_USE_LOCAL_DEPS: 1
       OPENGESTURES_TARGET_RELEASE: 2025
-      DARWINPRIVATEFRAMEWORKS_TARGET_RELEASE: 2025
-      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Xcode
         uses: OpenSwiftUIProject/setup-xcode@v2
         with:
           xcode-version: ${{ matrix.xcode-version }}
-      - name: Set up build environment
-        run: Scripts/CI/darwin_setup_build.sh
-        shell: bash
       - name: Build in debug mode on iOS
         run: |
           xcodebuild build \
-            -workspace .swiftpm/xcode/package.xcworkspace \
-            -scheme OpenGestures-Package \
+            -scheme OpenGestures \
             -configuration Debug \
             -destination "platform=iOS Simulator,OS=${{ matrix.ios-version }},name=${{ matrix.ios-simulator-name }}" \
             -derivedDataPath .build-debug \
             -skipMacroValidation \
-            -skipPackagePluginValidation \
-            OTHER_SWIFT_FLAGS="-warnings-as-errors"
+            -skipPackagePluginValidation
       - name: Build and run tests in debug mode with coverage on iOS Simulator
         run: |
           xcodebuild test \
-            -workspace .swiftpm/xcode/package.xcworkspace \
-            -scheme OpenGestures-Package \
+            -scheme OpenGestures \
             -configuration Debug \
             -destination "platform=iOS Simulator,OS=${{ matrix.ios-version }},name=${{ matrix.ios-simulator-name }}" \
             -enableCodeCoverage=YES \

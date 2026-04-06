@@ -1,4 +1,5 @@
-public import Foundation
+#if canImport(Darwin)
+import Foundation
 
 // MARK: - RunLoopUpdateDriver
 
@@ -53,3 +54,5 @@ public final class RunLoopUpdateDriver: GestureUpdateDriver, @unchecked Sendable
         }
     }
 }
+
+#endif

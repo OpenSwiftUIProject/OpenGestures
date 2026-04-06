@@ -1,4 +1,4 @@
-public import CoreGraphics
+public import OpenCoreGraphicsShims
 
 // MARK: - TouchEvent
 

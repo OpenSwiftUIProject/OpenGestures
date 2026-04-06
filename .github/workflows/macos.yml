@@ -12,24 +12,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15]
+        os: [macos-26]
         xcode-version: ["26.3"]   # Swift 6.2
     runs-on: ${{ matrix.os }}
     env:
       OPENGESTURES_WERROR: 1
-      OPENGESTURES_USE_LOCAL_DEPS: 1
       OPENGESTURES_TARGET_RELEASE: 2025
-      DARWINPRIVATEFRAMEWORKS_TARGET_RELEASE: 2025
-      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Xcode
         uses: OpenSwiftUIProject/setup-xcode@v2
         with:
           xcode-version: ${{ matrix.xcode-version }}
-      - name: Set up build environment
-        run: Scripts/CI/darwin_setup_build.sh
-        shell: bash
       - name: Build and run tests in debug mode with coverage
         run: |
           swift test \

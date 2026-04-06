@@ -29,8 +29,11 @@ clone_checkout_gf() {
 }
 
 update_gf() {
-  cd $REPO_ROOT/../DarwinPrivateFrameworks
-  swift package update-xcframeworks --allow-writing-to-package-directory
+  cd $REPO_ROOT/../DarwinPrivateFrameworks/GF
+  # GF/update.sh uses DARWINPRIVATEFRAMEWORKS_TARGET_RELEASE to pick the
+  # version directory (GF/2025/).  The CI workflow may set a different value
+  # for DPF's Package.swift evaluation, so we pin 2025 here explicitly.
+  DARWINPRIVATEFRAMEWORKS_TARGET_RELEASE=2025 bash update.sh
 }
 
 clone_checkout_gf
