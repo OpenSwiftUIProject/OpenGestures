@@ -95,7 +95,7 @@ package struct RelationMap: Sendable {
         add(definition, for: relation.target)
     }
 
-    mutating func removeRelation(_ relation: GestureRelation) {
+    package mutating func removeRelation(_ relation: GestureRelation) {
         let definition = RelationDefinition(
             type: relation.type,
             direction: relation.direction,
