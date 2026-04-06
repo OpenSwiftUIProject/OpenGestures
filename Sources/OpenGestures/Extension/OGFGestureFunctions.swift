@@ -36,6 +36,34 @@ public func ogfGestureComponentControllerSetNode(
     preconditionFailure("")
 }
 
+#else
+
+public func OGFGestureNodeDefaultValue() -> Any {
+    ()
+}
+
+public func OGFGestureNodeCreateDefault(_ key: Int) -> any OGFGestureNode {
+    _openGesturesPlatformUnimplementedFailure()
+}
+
+public func OGFGestureNodeCoordinatorCreate(
+    _ willUpdateHandler: (() -> Void)?,
+    _ didUpdateHandler: (() -> Void)?
+) -> any OGFGestureNodeCoordinator {
+    _openGesturesPlatformUnimplementedFailure()
+}
+
+public func OGFGestureComponentControllerSetNode(
+    _ controller: AnyObject,
+    _ node: (any OGFGestureNode)?
+) {
+    _openGesturesPlatformUnimplementedFailure()
+}
+
+public func OGFGestureFailureTypeIsTerminated(_ type: OGFGestureFailureType) -> Bool {
+    ogfGestureFailureTypeIsTerminated(type: type)
+}
+
 #endif
 
 @_cdecl("OGFGestureFailureTypeIsTerminated")

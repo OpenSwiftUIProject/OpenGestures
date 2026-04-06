@@ -14,3 +14,14 @@ package func preconditionFailure(_ message: @autoclosure () -> String, file: Sta
 package func preconditionFailure(_ message: @autoclosure () -> String) -> Never {
     preconditionFailure(message(), file: #fileID, line: #line)
 }
+
+// MARK: - Platform Unimplemented
+
+@_transparent
+package func _openGesturesPlatformUnimplementedFailure(
+    _ function: String = #function,
+    file: StaticString = #fileID,
+    line: UInt = #line
+) -> Never {
+    preconditionFailure("Unimplemented for this platform yet", file: file, line: line)
+}
