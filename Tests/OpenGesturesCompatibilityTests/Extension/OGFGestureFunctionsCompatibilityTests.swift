@@ -5,9 +5,9 @@
 import COpenGestures
 import Testing
 
-struct OGFGestureFailureTypeIsTerminatedTests {
+struct OGFGestureFunctionsCompatibilityTests {
     @Test(arguments: [
-        (OGFGestureFailureType.excluded, false),
+        (.excluded, false),
         (.failureDependency, false),
         (.customError, true),
         (.disabled, true),
@@ -15,8 +15,8 @@ struct OGFGestureFailureTypeIsTerminatedTests {
         (.activationDenied, true),
         (.aborted, true),
         (.coordinatorChanged, false),
-    ])
-    func isTerminated(_ type: OGFGestureFailureType, _ expected: Bool) {
+    ] as [(OGFGestureFailureType, Bool)])
+    func failureTypeIsTerminated(_ type: OGFGestureFailureType, _ expected: Bool) {
         #expect(type.isTerminated == expected)
     }
 }
