@@ -21,13 +21,12 @@ public struct GestureTrait: Hashable, Identifiable, Sendable, NestedCustomString
         TraitLabelStore.shared.label(for: id.rawValue)
     }
 
-    // TBA
     public var description: String {
         if attributes.isEmpty {
             return label
         }
         let attrs = attributes.map { "\($0.key.label): \($0.value)" }.joined(separator: ", ")
-        return "\(label)(\(attrs))"
+        return "\(label) {\(attrs)}"
     }
 
     // TBA
@@ -176,8 +175,7 @@ extension GestureTraitCollection: NestedCustomStringConvertible {
     public var label: String { "GestureTraitCollection" }
 
     public var description: String {
-        let traitDescs = _traits.values.map(\.description).joined(separator: ", ")
-        return "[\(traitDescs)]"
+        "[\(_traits.values.map(\.description).joined(separator: ", "))]"
     }
 
     public var debugDescription: String {
