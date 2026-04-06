@@ -6,6 +6,7 @@
 #include <OpenGestures/OGFVersion.h>
 #include <OpenGestures/OGFGesturePhase.h>
 #include <OpenGestures/OGFGestureRelation.h>
+#include <OpenGestures/OGFGestureFailureType.h>
 #include <OpenGestures/OGFGestureNode.h>
 #include <OpenGestures/OGFGestureNodeDelegate.h>
 #include <OpenGestures/OGFGestureNodeContainer.h>
