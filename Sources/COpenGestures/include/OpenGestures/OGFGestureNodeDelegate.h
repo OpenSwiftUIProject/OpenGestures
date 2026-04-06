@@ -23,15 +23,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @required
 
-- (void)gestureNode:(id)gestureNode didUpdatePhase:(OGFGesturePhase)didUpdatePhase;
-- (id)gestureNode:(id)gestureNode roleForRelationType:(OGFGestureRelationType)relationType relatedNode:(id)relatedNode;
-- (BOOL)gestureNodeShouldActivate:(id)gestureNodeShouldActivate;
-- (void)gestureNodeWillUnblock:(id)gestureNodeWillUnblock;
+- (void)gestureNode:(id<OGFGestureNode>)gestureNode didUpdatePhase:(OGFGesturePhase)phase;
+- (nullable id)gestureNode:(id<OGFGestureNode>)gestureNode roleForRelationType:(OGFGestureRelationType)relationType relatedNode:(id<OGFGestureNode>)relatedNode;
+- (BOOL)gestureNodeShouldActivate:(id<OGFGestureNode>)node;
+- (void)gestureNodeWillUnblock:(id<OGFGestureNode>)node;
 
 @optional
 
-- (void)gestureNode:(id)gestureNode didEnqueuePhase:(OGFGesturePhase)didEnqueuePhase;
-- (void)gestureNodeWillAbort:(id)gestureNodeWillAbort;
+- (void)gestureNode:(id<OGFGestureNode>)gestureNode didEnqueuePhase:(OGFGesturePhase)phase;
+- (void)gestureNodeWillAbort:(id<OGFGestureNode>)node;
 
 @end
 

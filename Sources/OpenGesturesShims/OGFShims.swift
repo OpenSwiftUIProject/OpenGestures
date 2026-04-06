@@ -17,12 +17,18 @@ public struct GesturesFrameworkVendor: RawRepresentable, Hashable, CaseIterable,
 #if OPENGESTURES_GESTURES
 @_exported import Gestures
 
-public let gesturesVendor: GesturesFrameworkVendor = .gestures
-
 public typealias OGFGesturePhase = GFGesturePhase
 public typealias OGFGestureRelationType = GFGestureRelationType
 public typealias OGFGestureRelationRole = GFGestureRelationRole
+public typealias OGFGestureFailureType = GFGestureFailureType
 
+public let OGFGestureNodeCreateDefault = GFGestureNodeCreateDefault
+public let OGFGestureNodeDefaultValue = GFGestureNodeDefaultValue
+public let OGFGestureNodeCoordinatorCreate = GFGestureNodeCoordinatorCreate
+public let OGFGestureComponentControllerSetNode = GFGestureComponentControllerSetNode
+public let OGFGestureFailureTypeIsTerminated = GFGestureFailureTypeIsTerminated
+
+public let gesturesVendor: GesturesFrameworkVendor = .gestures
 #else
 @_exported import OpenGestures
 public let gesturesVendor: GesturesFrameworkVendor = .openGestures

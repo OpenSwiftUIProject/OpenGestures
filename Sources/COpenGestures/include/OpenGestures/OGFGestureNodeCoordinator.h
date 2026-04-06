@@ -3,7 +3,7 @@
 //  OpenGestures
 //
 //  Audited for 9126.1.5
-//  Status: Complete
+//  Status: WIP (handler type)
 
 #ifndef OGFGestureNodeCoordinator_h
 #define OGFGestureNodeCoordinator_h
@@ -21,19 +21,23 @@ NS_ASSUME_NONNULL_BEGIN
 
 @required
 
-@property (nonatomic, readonly) NSArray *nodes;
-@property (nonatomic, copy) id /* block */ willUpdateHandler;
-@property (nonatomic, copy) id /* block */ willProcessUpdateQueueHandler;
-@property (nonatomic, copy) id /* block */ didUpdateHandler;
+@property (nonatomic, readonly) NSArray<id<OGFGestureNode>> *nodes;
+@property (nonatomic, copy, nullable) void (^willUpdateHandler)(void);
+@property (nonatomic, copy, nullable) void (^willProcessUpdateQueueHandler)(void);
+@property (nonatomic, copy, nullable) void (^didUpdateHandler)(void);
 
-- (void)enqueueUpdatesForNodes:(id)nodes inBlock:(id /* block */)inBlock reason:(id)reason;
-- (BOOL)hasUnresolvedFailureDependenciesForNode:(id)node;
-- (void)setWillProcessUpdateQueueHandler:(id /* block */)willProcessUpdateQueueHandler;
-- (void)updateWithNodes:(id)nodes reason:(id)reason updateHandler:(id /* block */)updateHandler;
-- (id)failureDependentsForNode:(id)node;
-- (void)processUpdatesWithReason:(id)reason;
-- (void)setDidUpdateHandler:(id /* block */)didUpdateHandler;
-- (void)setWillUpdateHandler:(id /* block */)willUpdateHandler;
+- (void)enqueueUpdatesForNodes:(NSArray<id<OGFGestureNode>> *)nodes
+                       inBlock:(void (^)(NSArray<id<OGFGestureNode>> *))block
+                        reason:(NSString *)reason;
+- (BOOL)hasUnresolvedFailureDependenciesForNode:(id<OGFGestureNode>)node;
+- (void)setWillProcessUpdateQueueHandler:(nullable void (^)(void))handler;
+- (void)updateWithNodes:(NSArray<id<OGFGestureNode>> *)nodes
+                 reason:(NSString *)reason
+          updateHandler:(void (^)(NSArray<id<OGFGestureNode>> *))handler;
+- (NSArray<id<OGFGestureNode>> *)failureDependentsForNode:(id<OGFGestureNode>)node;
+- (void)processUpdatesWithReason:(NSString *)reason;
+- (void)setDidUpdateHandler:(nullable void (^)(void))handler;
+- (void)setWillUpdateHandler:(nullable void (^)(void))handler;
 
 @end
 
