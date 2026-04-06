@@ -8,30 +8,13 @@
 
 // MARK: - GestureTrait
 
-public struct GestureTrait: Hashable, Identifiable, Sendable, NestedCustomStringConvertible {
+public struct GestureTrait: Hashable, Identifiable, Sendable {
     public var id: GestureTraitID
     public var attributes: [AttributeKey: AttributeValue]
 
     public init(id: GestureTraitID, attributes: [AttributeKey: AttributeValue] = [:]) {
         self.id = id
         self.attributes = attributes
-    }
-
-    public var label: String {
-        TraitLabelStore.shared.label(for: id.rawValue)
-    }
-
-    public var description: String {
-        if attributes.isEmpty {
-            return label
-        }
-        let attrs = attributes.map { "\($0.key.label): \($0.value)" }.joined(separator: ", ")
-        return "\(label) {\(attrs)}"
-    }
-
-    // TBA
-    public var debugDescription: String {
-        description
     }
 
     // MARK: - Factory Methods
@@ -78,7 +61,7 @@ public struct GestureTrait: Hashable, Identifiable, Sendable, NestedCustomString
             self.rawValue = TraitLabelStore.shared.register(label)
         }
 
-        public var label: String {
+        package var label: String {
             TraitLabelStore.shared.label(for: rawValue)
         }
 
@@ -109,6 +92,25 @@ public struct GestureTrait: Hashable, Identifiable, Sendable, NestedCustomString
                 "\(value)"
             }
         }
+    }
+}
+
+@_spi(Private)
+extension GestureTrait: NestedCustomStringConvertible {
+    public var label: String {
+        TraitLabelStore.shared.label(for: id.rawValue)
+    }
+
+    public var description: String {
+        if attributes.isEmpty {
+            return label
+        }
+        let attrs = attributes.map { "\($0.key.label): \($0.value)" }.joined(separator: ", ")
+        return "\(label) {\(attrs)}"
+    }
+
+    public var debugDescription: String {
+        description
     }
 }
 
@@ -162,6 +164,7 @@ public struct GestureTraitCollection: Hashable, Sendable {
 
 // MARK: - GestureTraitCollection + Sequence
 
+@_spi(Private)
 extension GestureTraitCollection: Sequence {
     public func makeIterator() -> some IteratorProtocol {
         _traits.values.makeIterator()
@@ -170,7 +173,7 @@ extension GestureTraitCollection: Sequence {
 
 // MARK: - GestureTraitCollection + CustomStringConvertible
 
-// TBA
+@_spi(Private)
 extension GestureTraitCollection: NestedCustomStringConvertible {
     public var label: String { "GestureTraitCollection" }
 
@@ -185,8 +188,9 @@ extension GestureTraitCollection: NestedCustomStringConvertible {
 
 // MARK: - GestureTraitCollection + Mergeable
 
+@_spi(Private)
 extension GestureTraitCollection: Mergeable {
-    package mutating func merge(_ other: GestureTraitCollection) {
+    public mutating func merge(_ other: GestureTraitCollection) {
         _traits.merge(other._traits) { $1 }
     }
 }
