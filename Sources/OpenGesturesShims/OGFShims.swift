@@ -15,7 +15,10 @@ public struct GesturesFrameworkVendor: RawRepresentable, Hashable, CaseIterable,
 }
 
 #if OPENGESTURES_GESTURES
-@_exported import Gestures
+@_exported public import Gestures
+#if os(iOS) && !targetEnvironment(simulator)
+public import _GesturesDeviceSwiftShims
+#endif
 
 public typealias OGFGesturePhase = GFGesturePhase
 public typealias OGFGestureRelationType = GFGestureRelationType
@@ -30,6 +33,7 @@ public let OGFGestureFailureTypeIsTerminated = GFGestureFailureTypeIsTerminated
 
 public let gesturesVendor: GesturesFrameworkVendor = .gestures
 #else
-@_exported import OpenGestures
+@_exported public import OpenGestures
+
 public let gesturesVendor: GesturesFrameworkVendor = .openGestures
 #endif
