@@ -4,6 +4,95 @@
 
 import Testing
 
+// MARK: - GestureTraitCompatibilityTests
+
+@Suite
+struct GestureTraitCompatibilityTests {
+    @Test
+    func initializer() {
+        let trait = GestureTrait(id: .longPress, attributes: [:])
+        _ = trait
+    }
+
+    @Test
+    func identifiable() {
+        let box: any Identifiable = GestureTrait.tap()
+        _ = box.id
+    }
+
+    // MARK: - GestureTrait Factory Methods
+
+    @Test
+    func pan() {
+        let trait = GestureTrait.pan()
+        #expect(trait.id == .pan)
+        #expect(trait.attributes.isEmpty)
+    }
+
+    @Test
+    func tapDefaults() {
+        let trait = GestureTrait.tap()
+        #expect(trait.id == .tap)
+        #expect(trait.attributes.isEmpty)
+    }
+
+    @Test
+    func tapWithParameters() {
+        let trait = GestureTrait.tap(tapCount: 2, pointCount: 1)
+        #expect(trait.id == .tap)
+        #expect(trait.attributes[.tapCount] == .int(2))
+        #expect(trait.attributes[.pointCount] == .int(1))
+    }
+
+    @Test
+    func longPressDefaults() {
+        let trait = GestureTrait.longPress()
+        #expect(trait.id == .longPress)
+        #expect(trait.attributes.isEmpty)
+    }
+
+    @Test
+    func longPressWithParameters() {
+        let trait = GestureTrait.longPress(
+            pointCount: 1,
+            minimumDuration: .seconds(0.5),
+            maximumMovement: 10.0
+        )
+        #expect(trait.id == .longPress)
+        #expect(trait.attributes[.pointCount] == .int(1))
+        #expect(trait.attributes[.minimumDuration] == .double(0.5))
+        #expect(trait.attributes[.maximumMovement] == .double(10.0))
+    }
+
+    @Suite
+    struct AttributeKeyCompatibilityTests {
+        @Test(arguments: [
+            (.pointCount, "pointCount"),
+            (.tapCount, "tapCount"),
+            (.minimumDuration, "minimumDuration"),
+            (.maximumMovement, "maximumMovement"),
+        ] as [(GestureTrait.AttributeKey, String)])
+        func description(_ key: GestureTrait.AttributeKey, _ expected: String) {
+            #expect(key.description == expected)
+        }
+    }
+
+    // MARK: - AttributeValueCompatibilityTests
+
+    @Suite
+    struct AttributeValueCompatibilityTests {
+        @Test(arguments: [
+            (.bool(true), "true"),
+            (.bool(false), "false"),
+            (.int(42), "42"),
+            (.double(1.5), "1.5"),
+        ] as [(GestureTrait.AttributeValue, String)])
+        func description(_ value: GestureTrait.AttributeValue, _ expected: String) {
+            #expect(value.description == expected)
+        }
+    }
+}
+
 // MARK: - GestureTraitIDCompatibilityTests
 
 @Suite
