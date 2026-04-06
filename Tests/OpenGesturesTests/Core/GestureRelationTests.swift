@@ -5,44 +5,10 @@
 import OpenGestures
 import Testing
 
+// MARK: - RelationMapTests
+
 @Suite
-struct GestureRelationTests {
-    // MARK: - RelationDefinition
-
-    @Test
-    func relationDefinitionInit() {
-        let def = RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular)
-        #expect(def.type == .exclusion)
-        #expect(def.direction == .outgoing)
-        #expect(def.role == .regular)
-    }
-
-    @Test
-    func relationDefinitionNilRole() {
-        let def = RelationDefinition(type: .failureRequirement, direction: .incoming)
-        #expect(def.role == nil)
-    }
-
-    @Test
-    func relationDefinitionEquality() {
-        let a = RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular)
-        let b = RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular)
-        let c = RelationDefinition(type: .exclusion, direction: .incoming, role: .regular)
-        #expect(a == b)
-        #expect(a != c)
-    }
-
-    @Test
-    func relationDefinitionHashable() {
-        var set: Set<RelationDefinition> = []
-        set.insert(RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular))
-        set.insert(RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular))
-        set.insert(RelationDefinition(type: .exclusion, direction: .incoming, role: .blocking))
-        #expect(set.count == 2)
-    }
-
-    // MARK: - RelationMap
-
+struct RelationMapTests {
     @Test
     func relationMapEmpty() {
         let map = RelationMap()
@@ -110,5 +76,42 @@ struct GestureRelationTests {
             count += 1
         }
         #expect(count == 2)
+    }
+}
+
+// MARK: - RelationDefinitionTests
+
+@Suite
+struct RelationDefinitionTests {
+    @Test
+    func relationDefinitionInit() {
+        let def = RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular)
+        #expect(def.type == .exclusion)
+        #expect(def.direction == .outgoing)
+        #expect(def.role == .regular)
+    }
+
+    @Test
+    func relationDefinitionNilRole() {
+        let def = RelationDefinition(type: .failureRequirement, direction: .incoming)
+        #expect(def.role == nil)
+    }
+
+    @Test
+    func relationDefinitionEquality() {
+        let a = RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular)
+        let b = RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular)
+        let c = RelationDefinition(type: .exclusion, direction: .incoming, role: .regular)
+        #expect(a == b)
+        #expect(a != c)
+    }
+
+    @Test
+    func relationDefinitionHashable() {
+        var set: Set<RelationDefinition> = []
+        set.insert(RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular))
+        set.insert(RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular))
+        set.insert(RelationDefinition(type: .exclusion, direction: .incoming, role: .blocking))
+        #expect(set.count == 2)
     }
 }
