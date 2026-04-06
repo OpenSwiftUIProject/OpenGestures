@@ -4,10 +4,10 @@
 
 import Testing
 
-// MARK: - GestureTraitIDTests
+// MARK: - GestureTraitIDCompatibilityTests
 
 @Suite
-struct GestureTraitIDTests {
+struct GestureTraitIDCompatibilityTests {
     @Test
     func staticPropertiesAreUnique() {
         let ids: [GestureTraitID] = [.tap, .longPress, .pan]
@@ -31,10 +31,10 @@ struct GestureTraitIDTests {
     }
 }
 
-// MARK: - GestureTraitCollectionTests
+// MARK: - GestureTraitCollectionCompatibilityTests
 
 @Suite
-struct GestureTraitCollectionTests {
+struct GestureTraitCollectionCompatibilityTests {
     @Test
     func withTrait() {
         let collection = GestureTraitCollection.withTrait(.pan())
