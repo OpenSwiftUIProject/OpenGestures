@@ -22,6 +22,7 @@ public let gesturesVendor: GesturesFrameworkVendor = .gestures
 public typealias OGFGesturePhase = GFGesturePhase
 public typealias OGFGestureRelationType = GFGestureRelationType
 public typealias OGFGestureRelationRole = GFGestureRelationRole
+public typealias OGFGestureFailureType = GFGestureFailureType
 
 #else
 @_exported import OpenGestures

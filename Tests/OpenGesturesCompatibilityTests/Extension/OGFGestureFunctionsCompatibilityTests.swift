@@ -2,7 +2,6 @@
 //  OGFGestureFunctionsCompatibilityTests.swift
 //  OpenGesturesCompatibilityTests
 
-import COpenGestures
 import Testing
 
 struct OGFGestureFunctionsCompatibilityTests {

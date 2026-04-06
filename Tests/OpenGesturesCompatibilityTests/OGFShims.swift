@@ -10,5 +10,6 @@ let compatibilityTestEnabled = false
 public typealias OGFGesturePhase = GFGesturePhase
 public typealias OGFGestureRelationType = GFGestureRelationType
 public typealias OGFGestureRelationRole = GFGestureRelationRole
+public typealias OGFGestureFailureType = GFGestureFailureType
 public let compatibilityTestEnabled = true
 #endif
