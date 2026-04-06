@@ -7,6 +7,7 @@
 
 // MARK: - GestureTag
 
+@frozen
 public struct GestureTag: Hashable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible {
     public let rawValue: String
 
@@ -19,6 +20,6 @@ public struct GestureTag: Hashable, Sendable, ExpressibleByStringLiteral, Custom
     }
 
     public var description: String {
-        rawValue
+        "\"\(rawValue)\""
     }
 }
