@@ -120,7 +120,7 @@ package struct RelationMap: Sendable {
     }
 }
 
-// MARK: - RelationMap + Sequence [TBA]
+// MARK: - RelationMap + Sequence
 
 extension RelationMap: Sequence {
     package func makeIterator() -> some IteratorProtocol {
@@ -164,10 +164,11 @@ package struct RelationDefinition: Hashable, Sendable, CustomStringConvertible {
     }
 
     package var description: String {
-        if let role {
-            "\(type) \(direction) (\(role))"
-        } else {
-            "\(type) \(direction)"
+        let dir = switch direction {
+        case .outgoing: "out"
+        case .incoming: "in"
         }
+        let roleStr = if let role { "\(role)" } else { "dynamic" }
+        return "\(type)[\(dir)]=\(roleStr)"
     }
 }

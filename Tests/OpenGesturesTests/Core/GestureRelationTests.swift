@@ -114,4 +114,16 @@ struct RelationDefinitionTests {
         set.insert(RelationDefinition(type: .exclusion, direction: .incoming, role: .blocking))
         #expect(set.count == 2)
     }
+
+    @Test(arguments: [
+        (RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular), "exclusion[out]=regular"),
+        (RelationDefinition(type: .exclusion, direction: .incoming, role: .regular), "exclusion[in]=regular"),
+        (RelationDefinition(type: .activeExclusion, direction: .outgoing, role: .blocking), "activeExclusion[out]=blocking"),
+        (RelationDefinition(type: .activeExclusion, direction: .incoming, role: .blocking), "activeExclusion[in]=blocking"),
+        (RelationDefinition(type: .failureRequirement, direction: .outgoing), "failureRequirement[out]=dynamic"),
+        (RelationDefinition(type: .failureRequirement, direction: .incoming, role: nil), "failureRequirement[in]=dynamic"),
+    ])
+    func description(_ definition: RelationDefinition, _ expected: String) {
+        #expect(definition.description == expected)
+    }
 }
