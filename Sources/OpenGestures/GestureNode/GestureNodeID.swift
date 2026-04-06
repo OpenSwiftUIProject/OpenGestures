@@ -1,10 +1,18 @@
+//
+//  GestureNodeID.swift
+//  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
+
 // MARK: - GestureNodeID
 
 /// A unique identifier for a gesture node.
+@frozen
 public struct GestureNodeID: Hashable, Comparable, Sendable, CustomStringConvertible {
-    public var rawValue: UInt32
+    package let rawValue: UInt32
 
-    public init(rawValue: UInt32) {
+    package init(rawValue: UInt32) {
         self.rawValue = rawValue
     }
 
@@ -13,6 +21,6 @@ public struct GestureNodeID: Hashable, Comparable, Sendable, CustomStringConvert
     }
 
     public var description: String {
-        "GestureNodeID(\(rawValue))"
+        rawValue.description
     }
 }
