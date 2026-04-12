@@ -176,34 +176,12 @@ extension GestureTraitCollection: Sequence {
 
 // MARK: - GestureTraitCollection + CustomStringConvertible
 
-@_spi(Private)
 extension GestureTraitCollection: NestedCustomStringConvertible {
-
     package func populateNestedDescription(_ nested: inout NestedDescription) {
-        for trait in _traits.values {
-            var traitNested = NestedDescription(
-                options: [],
-                customPrefix: nil,
-                customSuffix: nil,
-                depth: nested.depth + 1,
-                target: trait,
-                buffer: []
-            )
-            trait.populateNestedDescription(&traitNested)
-            for item in traitNested.buffer {
-                nested.append(item)
-            }
-        }
-    }
-
-    public var label: String { "GestureTraitCollection" }
-
-    public var description: String {
-        "[\(_traits.values.map(\.description).joined(separator: ", "))]"
-    }
-
-    public var debugDescription: String {
-        description
+        nested.options.formUnion([.hideTypeName, .compact])
+        nested.customPrefix = ""
+        nested.customSuffix = ""
+        nested.append(_traits.values)
     }
 }
 
