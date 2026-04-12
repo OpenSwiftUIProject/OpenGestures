@@ -59,7 +59,7 @@ public final class GestureComponentController<C: GestureComponent>: AnyGestureCo
                 break
             case .value(let value, _):
                 try node.update(someValue: value, isFinalUpdate: false)
-            case .final(let value, _):
+            case .finalValue(let value, _):
                 try node.update(someValue: value, isFinalUpdate: true)
             }
         } catch {

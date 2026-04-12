@@ -41,9 +41,9 @@ public final class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Send
     public func update(value: Value, isFinalUpdate: Bool) throws {
         let oldPhase = phase
         if isFinalUpdate {
-            phase = .ended(value)
+            phase = .ended(value: value)
         } else {
-            phase = .active(value)
+            phase = .active(value: value)
         }
         latestPhase = phase
         _didUpdatePhase?(phase, oldPhase)
@@ -60,7 +60,7 @@ public final class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Send
 
     public override func abort() throws {
         let oldPhase = phase
-        phase = .failed(.aborted)
+        phase = .failed(reason:.aborted)
         latestPhase = phase
         _didUpdatePhase?(phase, oldPhase)
     }
@@ -68,7 +68,7 @@ public final class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Send
     public override func fail(with error: Error) throws {
         let oldPhase = phase
         // TODO: .error(Error) case once non-Sendable handling resolved
-        phase = .failed(.aborted)
+        phase = .failed(reason:.aborted)
         latestPhase = phase
         _didUpdatePhase?(phase, oldPhase)
     }
