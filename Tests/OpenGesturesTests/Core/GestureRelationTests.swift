@@ -92,29 +92,38 @@ struct RelationMapTests {
             }
             """#
         ),
-        (
-            {
-                var map = RelationMap()
-                let matcher = GestureNodeMatcher.any(position: .any)
-                map.add(
-                    RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular),
-                    for: matcher
-                )
-                map.add(
-                    RelationDefinition(type: .failureRequirement, direction: .incoming),
-                    for: matcher
-                )
-                return map
-            }(),
-            #"""
+    ])
+    func description(_ map: RelationMap, _ expected: String) {
+        #expect("\(map)" == expected)
+    }
+
+    @Test
+    func descriptionMultipleDefinitions() {
+        var map = RelationMap()
+        let matcher = GestureNodeMatcher.any(position: .any)
+        map.add(
+            RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular),
+            for: matcher
+        )
+        map.add(
+            RelationDefinition(type: .failureRequirement, direction: .incoming),
+            for: matcher
+        )
+        let description = "\(map)"
+        // Set ordering is non-deterministic
+        #expect(
+            description == #"""
             { \#("")
               [exclusion[out]=regular, failureRequirement[in]=dynamic]: any, position: any
             }
             """#
-        ),
-    ])
-    func description(_ map: RelationMap, _ expected: String) {
-        #expect("\(map)" == expected)
+            ||
+            description == #"""
+            { \#("")
+              [failureRequirement[in]=dynamic, exclusion[out]=regular]: any, position: any
+            }
+            """#
+        )
     }
 }
 
