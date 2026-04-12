@@ -209,9 +209,8 @@ extension GestureTraitCollection: NestedCustomStringConvertible {
 
 // MARK: - GestureTraitCollection + Mergeable
 
-@_spi(Private)
 extension GestureTraitCollection: Mergeable {
-    public mutating func merge(_ other: GestureTraitCollection) {
+    package mutating func merge(_ other: GestureTraitCollection) {
         _traits.merge(other._traits) { $1 }
     }
 }
