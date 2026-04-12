@@ -88,20 +88,27 @@ struct RelationMapTests {
             ]),
             #"""
             { \#("")
-              [exclusion[out]=regular]: { any, any }
+              [exclusion[out]=regular]: any, position: any
             }
             """#
         ),
         (
-            RelationMap(relations: [
-                GestureNodeMatcher.any(position: .any): [
+            {
+                var map = RelationMap()
+                let matcher = GestureNodeMatcher.any(position: .any)
+                map.add(
                     RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular),
+                    for: matcher
+                )
+                map.add(
                     RelationDefinition(type: .failureRequirement, direction: .incoming),
-                ],
-            ]),
+                    for: matcher
+                )
+                return map
+            }(),
             #"""
             { \#("")
-              [exclusion[out]=regular, failureRequirement[in]=dynamic]: { any, any }
+              [exclusion[out]=regular, failureRequirement[in]=dynamic]: any, position: any
             }
             """#
         ),
