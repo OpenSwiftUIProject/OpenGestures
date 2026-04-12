@@ -39,21 +39,27 @@
 public enum GesturePhase<Value> {
 
     /// The gesture is not participating in recognition.
+    @_spi(Private)
     case idle
 
     /// The gesture is evaluating incoming events.
+    @_spi(Private)
     case possible
 
     /// The gesture is recognized but blocked by another gesture.
+    @_spi(Private)
     case blocked(value: Value, blockedBy: GestureNodeID)
 
     /// The gesture is actively recognized and producing values.
+    @_spi(Private)
     case active(value: Value)
 
     /// The gesture completed successfully.
+    @_spi(Private)
     case ended(value: Value)
 
     /// The gesture failed.
+    @_spi(Private)
     case failed(reason: GestureFailureReason)
 }
 
@@ -154,7 +160,7 @@ extension GesturePhase {
     /// For phases that carry a value (``blocked(value:blockedBy:)``,
     /// ``active(value:)``, ``ended(value:)``), the closure is applied to
     /// produce the new value. Other phases are passed through unchanged.
-    public func mapValue<T>(_ transform: (Value) -> T) -> GesturePhase<T> {
+    public func mapValue<T: Sendable>(_ transform: (Value) -> T) -> GesturePhase<T> {
         switch self {
         case .blocked(let v, let id): .blocked(value: transform(v), blockedBy: id)
         case .active(let v): .active(value: transform(v))

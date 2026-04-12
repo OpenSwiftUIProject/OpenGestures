@@ -1,6 +1,15 @@
 {
-  "originHash" : "1f5c963cefcebeb92c99c09e75ddc87ac641ecdfda959043b76386896c17affc",
+  "originHash" : "b0c693c0f8667ce8c6574c8df581b6938ebf72109273d8037d58f7baab49e995",
   "pins" : [
+    {
+      "identity" : "openattributegraph",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/OpenSwiftUIProject/OpenAttributeGraph.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "03c96a02a2427b6520bb7937e86221c171076562"
+      }
+    },
     {
       "identity" : "opencoregraphics",
       "kind" : "remoteSourceControl",
