@@ -31,11 +31,11 @@ public struct TimeSchedulerToken: Hashable, Sendable {
 
 // MARK: - ScheduledJob
 
-public struct ScheduledJob {
-    public let workItem: DispatchWorkItem
-    public let cancelHandler: (() -> Void)?
+package struct ScheduledJob {
+    package let workItem: DispatchWorkItem
+    package let cancelHandler: (() -> Void)?
 
-    public init(workItem: DispatchWorkItem, cancelHandler: (() -> Void)? = nil) {
+    package init(workItem: DispatchWorkItem, cancelHandler: (() -> Void)? = nil) {
         self.workItem = workItem
         self.cancelHandler = cancelHandler
     }
@@ -46,8 +46,8 @@ public struct ScheduledJob {
 public final class DispatchTimeScheduler: @unchecked Sendable, TimeScheduler {
     public let queue: DispatchQueue
     public let timeSource: any TimeSource
-    public var scheduledJobs: [TimeSchedulerToken: ScheduledJob] = [:]
-    public var counter: Int = 0
+    package var scheduledJobs: [TimeSchedulerToken: ScheduledJob] = [:]
+    package var counter: Int = 0
 
     public init(queue: DispatchQueue, timeSource: any TimeSource) {
         self.queue = queue

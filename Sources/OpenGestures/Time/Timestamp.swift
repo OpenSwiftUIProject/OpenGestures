@@ -7,10 +7,11 @@
 
 // MARK: - Timestamp
 
+@frozen
 public struct Timestamp: Hashable, Comparable, Sendable, CustomStringConvertible {
-    public let value: Duration
+    package let value: Duration
 
-    public init(value: Duration) {
+    package init(value: Duration) {
         self.value = value
     }
 

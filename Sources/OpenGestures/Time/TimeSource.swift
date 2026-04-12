@@ -11,6 +11,12 @@ public protocol TimeSource {
     var timestamp: Timestamp { get }
 }
 
+extension Never: TimeSource {
+    public var timestamp: Timestamp {
+        _openGesturesUnreachableCode()
+    }
+}
+
 // MARK: - TimeSourceImpl
 
 public protocol TimeSourceImpl: TimeSource {
@@ -18,6 +24,7 @@ public protocol TimeSourceImpl: TimeSource {
 }
 
 extension TimeSourceImpl {
+    @_spi(Private)
     public var timestamp: Timestamp {
         Timestamp(value: _duration)
     }
