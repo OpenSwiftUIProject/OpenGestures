@@ -95,22 +95,25 @@ public struct GestureTrait: Hashable, Identifiable, Sendable {
     }
 }
 
-@_spi(Private)
 extension GestureTrait: NestedCustomStringConvertible {
     public var label: String {
         TraitLabelStore.shared.label(for: id.rawValue)
     }
 
-    public var description: String {
+    package func populateNestedDescription(_ nested: inout NestedDescription) {
+        nested.options.formUnion([.hideTypeName, .compact])
+        nested.customPrefix = ""
+        nested.customSuffix = ""
+        nested.options.formUnion(.hideIdentity)
         if attributes.isEmpty {
-            return label
+            nested.append(label)
+        } else {
+            nested.customPrefix = label + " {"
+            nested.customSuffix = "}"
+            for (key, value) in attributes {
+                nested.append("\(key.label): \(value)")
+            }
         }
-        let attrs = attributes.map { "\($0.key.label): \($0.value)" }.joined(separator: ", ")
-        return "\(label) {\(attrs)}"
-    }
-
-    public var debugDescription: String {
-        description
     }
 }
 
@@ -175,6 +178,24 @@ extension GestureTraitCollection: Sequence {
 
 @_spi(Private)
 extension GestureTraitCollection: NestedCustomStringConvertible {
+
+    package func populateNestedDescription(_ nested: inout NestedDescription) {
+        for trait in _traits.values {
+            var traitNested = NestedDescription(
+                options: [],
+                customPrefix: nil,
+                customSuffix: nil,
+                depth: nested.depth + 1,
+                target: trait,
+                buffer: []
+            )
+            trait.populateNestedDescription(&traitNested)
+            for item in traitNested.buffer {
+                nested.append(item)
+            }
+        }
+    }
+
     public var label: String { "GestureTraitCollection" }
 
     public var description: String {

@@ -20,6 +20,28 @@ struct GestureTraitCompatibilityTests {
         _ = box.id
     }
 
+    // MARK: - Description
+
+    @Test(arguments: [
+        (GestureTrait.pan(), "pan"),
+        (GestureTrait.tap(), "tap"),
+        (GestureTrait.longPress(), "longPress"),
+        (GestureTrait.tap(tapCount: 1), "tap {tapCount: 1}"),
+        (GestureTrait.tap(pointCount: 2), "tap {pointCount: 2}"),
+        (GestureTrait.longPress(maximumMovement: 10.0), "longPress {maximumMovement: 10.0}"),
+    ])
+    func description(_ trait: GestureTrait, _ expectedDescription: String) {
+        #expect("\(trait)" == expectedDescription)
+    }
+
+    @Test
+    func descriptionMultipleAttributes() {
+        let trait = GestureTrait.tap(tapCount: 1, pointCount: 3)
+        let description = "\(trait)"
+        // Dictionary ordering of attributes is non-deterministic
+        #expect(description == "tap {tapCount: 1, pointCount: 3}" || description == "tap {pointCount: 3, tapCount: 1}")
+    }
+
     // MARK: - GestureTrait Factory Methods
 
     @Test
