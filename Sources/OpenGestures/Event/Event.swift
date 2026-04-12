@@ -32,29 +32,3 @@ public struct EventID: Hashable, Sendable, CustomStringConvertible {
         "EventID(\(rawValue))"
     }
 }
-
-// MARK: - Timestamp
-
-public struct Timestamp: Hashable, Comparable, Sendable, CustomStringConvertible {
-    public var value: Duration
-
-    public init(value: Duration) {
-        self.value = value
-    }
-
-    public static func < (lhs: Timestamp, rhs: Timestamp) -> Bool {
-        lhs.value < rhs.value
-    }
-
-    public var description: String {
-        "\(value)"
-    }
-
-    public func advanced(by duration: Duration) -> Timestamp {
-        Timestamp(value: value + duration)
-    }
-
-    public func duration(to other: Timestamp) -> Duration {
-        other.value - value
-    }
-}
