@@ -77,6 +77,38 @@ struct RelationMapTests {
         }
         #expect(count == 2)
     }
+
+    // MARK: - Description
+
+    @Test(arguments: [
+        (RelationMap(), "{}"),
+        (
+            RelationMap(relations: [
+                GestureNodeMatcher.any(position: .any): [RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular)],
+            ]),
+            #"""
+            { \#("")
+              [exclusion[out]=regular]: { any, any }
+            }
+            """#
+        ),
+        (
+            RelationMap(relations: [
+                GestureNodeMatcher.any(position: .any): [
+                    RelationDefinition(type: .exclusion, direction: .outgoing, role: .regular),
+                    RelationDefinition(type: .failureRequirement, direction: .incoming),
+                ],
+            ]),
+            #"""
+            { \#("")
+              [exclusion[out]=regular, failureRequirement[in]=dynamic]: { any, any }
+            }
+            """#
+        ),
+    ])
+    func description(_ map: RelationMap, _ expected: String) {
+        #expect("\(map)" == expected)
+    }
 }
 
 // MARK: - RelationDefinitionTests

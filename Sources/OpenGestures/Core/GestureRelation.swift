@@ -5,7 +5,7 @@
 //  Audited for 9126.1.5
 //  Status: Complete
 
-import OrderedCollections
+package import OrderedCollections
 
 // MARK: - GestureRelationType
 
@@ -71,7 +71,7 @@ package struct RelationMap: Sendable {
         self.relations = [:]
     }
 
-    init(relations: OrderedDictionary<GestureNodeMatcher, Set<RelationDefinition>>) {
+    package init(relations: OrderedDictionary<GestureNodeMatcher, Set<RelationDefinition>>) {
         self.relations = relations
     }
 
@@ -128,21 +128,14 @@ extension RelationMap: Sequence {
     }
 }
 
-// MARK: - RelationMap + NestedCustomStringConvertible [TBA]
+// MARK: - RelationMap + NestedCustomStringConvertible
 
 extension RelationMap: NestedCustomStringConvertible {
-    package var label: String { "RelationMap" }
-
-    package var description: String {
-        if relations.isEmpty {
-            return "\(label) {}"
+    package func populateNestedDescription(_ nested: inout NestedDescription) {
+        nested.options.formUnion(.hideTypeName)
+        for (matcher, definition) in relations {
+            nested.append("\(matcher)", label: "\(definition)")
         }
-        let entries = relations.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
-        return "\(label) {\(entries)}"
-    }
-
-    package var debugDescription: String {
-        description
     }
 }
 
