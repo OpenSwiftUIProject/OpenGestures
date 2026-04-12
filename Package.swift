@@ -205,6 +205,7 @@ let openGesturesTarget = Target.target(
     dependencies: [
         .target(name: cOpenGesturesTarget.name),
         .product(name: "OpenCoreGraphicsShims", package: "OpenCoreGraphics"),
+        .product(name: "OrderedCollections", package: "swift-collections"),
     ],
     swiftSettings: sharedSwiftSettings
 )
@@ -236,6 +237,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/OpenSwiftUIProject/OpenCoreGraphics.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
     ],
     targets: [
         cOpenGesturesTarget,
