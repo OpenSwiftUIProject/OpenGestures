@@ -18,12 +18,28 @@ package struct NestedDescription {
         package static let hideClassAddress = Self(rawValue: 1 << 2)
         package static let compact = Self(rawValue: 1 << 3)
     }
-    package var options: Options = []
+    package var options: Options
     package var customPrefix: String?
     package var customSuffix: String?
     package let depth: Int
     package let target: Any
-    package var buffer: [String] = []
+    package var buffer: [String]
+
+    package init(
+        options: Options = [],
+        customPrefix: String? = nil,
+        customSuffix: String? = nil,
+        depth: Int,
+        target: Any,
+        buffer: [String] = []
+    ) {
+        self.options = options
+        self.customPrefix = customPrefix
+        self.customSuffix = customSuffix
+        self.depth = depth
+        self.target = target
+        self.buffer = buffer
+    }
 
     mutating package func append(
         _ content: String?,
