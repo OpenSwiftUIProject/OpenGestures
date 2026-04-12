@@ -15,6 +15,23 @@ package func preconditionFailure(_ message: @autoclosure () -> String) -> Never 
     preconditionFailure(message(), file: #fileID, line: #line)
 }
 
+// MARK: - Abstract and stub call
+
+@_transparent
+package func _openGesturesUnreachableCode(_ function: String = #function, file: StaticString = #fileID, line: UInt = #line) -> Never {
+    preconditionFailure("", file: file, line: line)
+}
+
+@_transparent
+package func _openGesturesBaseClassAbstractMethod(_ function: String = #function, file: StaticString = #fileID, line: UInt = #line) -> Never {
+    preconditionFailure("", file: file, line: line)
+}
+
+@_transparent
+package func _openGesturesEmptyStub(_ function: String = #function, file: StaticString = #fileID, line: UInt = #line) {
+    // Intentionally empty - stub implementation
+}
+
 // MARK: - Platform Unimplemented
 
 @_transparent

@@ -1,24 +1,3 @@
-// MARK: - TimeSource
-
-/// Protocol for providing timestamps to the gesture system.
-public protocol TimeSource: Sendable {
-    var timestamp: Timestamp { get }
-}
-
-// MARK: - GestureUpdateDriver
-
-/// Protocol for driving gesture update cycles.
-public protocol GestureUpdateDriver: Sendable {
-    func register(_ handler: @escaping () -> Void) -> GestureUpdateDriverToken
-    func unregister(token: GestureUpdateDriverToken)
-}
-
-/// Token returned by GestureUpdateDriver.register.
-public struct GestureUpdateDriverToken: Hashable, Sendable {
-    public var value: UInt32
-    public init(value: UInt32) { self.value = value }
-}
-
 // MARK: - GestureNodeCoordinator
 
 /// Central coordinator that manages gesture node updates and conflict resolution.
