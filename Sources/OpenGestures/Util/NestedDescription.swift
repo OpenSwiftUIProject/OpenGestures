@@ -41,11 +41,11 @@ package struct NestedDescription {
         self.buffer = buffer
     }
 
-    mutating package func append(
-        _ content: String?,
+    mutating package func append<T>(
+        _ content: @autoclosure () -> T?,
         label: String? = nil
     ) {
-        guard let content else {
+        guard let content = content() else {
             return
         }
         var result: String = ""

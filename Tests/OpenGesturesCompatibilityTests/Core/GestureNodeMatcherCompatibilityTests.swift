@@ -42,7 +42,7 @@ struct GestureNodeMatcherCompatibilityTests {
 
     @Test(arguments: [
         (GestureNodeMatcher.id(.init(rawValue: 2)), "2"),
-        (GestureNodeMatcher.tag("A"), "\"A\""),
+        (GestureNodeMatcher.tag("A"), #""A""#),
         (GestureNodeMatcher.traits(.withTrait(.pan()), position: .below), "[pan], position: below"),
         (GestureNodeMatcher.any(position: .above), "any, position: above"),
     ])
