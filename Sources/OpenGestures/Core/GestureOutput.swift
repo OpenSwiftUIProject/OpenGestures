@@ -7,31 +7,33 @@
 
 // MARK: - GestureOutput
 
-public enum GestureOutput<Value> {
+public enum GestureOutput<Value: Sendable>: Sendable {
     case empty(GestureOutputEmptyReason, metadata: GestureOutputMetadata?)
     case value(Value, metadata: GestureOutputMetadata?)
     case finalValue(Value, metadata: GestureOutputMetadata?)
 }
 
-extension GestureOutput: Sendable where Value: Sendable {}
-
 extension GestureOutput {
     public var value: Value? {
         switch self {
-        case .value(let v, _): v
-        case .finalValue(let v, _): v
+        case let .value(v, _): v
+        case let .finalValue(v, _): v
         case .empty: nil
         }
     }
 
     public var isEmpty: Bool {
-        if case .empty = self { return true }
-        return false
+        switch self {
+        case .empty: true
+        default: false
+        }
     }
 
     public var isFinal: Bool {
-        if case .finalValue = self { return true }
-        return false
+        switch self {
+        case .finalValue: true
+        default: false
+        }
     }
 }
 
@@ -39,16 +41,20 @@ extension GestureOutput {
 
 extension GestureOutput: NestedCustomStringConvertible {
     package func populateNestedDescription(_ nested: inout NestedDescription) {
-        nested.options.formUnion([.hideTypeName, .compact])
-        nested.customPrefix = ""
-        nested.customSuffix = ""
+        let metadata: GestureOutputMetadata?
         switch self {
-        case .empty(let reason, _):
-            nested.append("empty(\(reason))")
-        case .value(_, _):
-            nested.append("value")
-        case .finalValue(_, _):
-            nested.append("finalValue")
+        case let .empty(reason, m):
+            nested.append(reason, label: "emptyReason")
+            metadata = m
+        case let .value(v, m):
+            nested.append(v, label: "value")
+            metadata = m
+        case let .finalValue(v, m):
+            nested.append(v, label: "finalValue")
+            metadata = m
+        }
+        if let metadata {
+            nested.append(metadata, label: "metadata")
         }
     }
 }
@@ -61,14 +67,14 @@ public enum GestureOutputEmptyReason: Hashable, Sendable {
     case timeUpdate
 }
 
-// MARK: - GestureOutputMetadata
+// MARK: - GestureOutputMetadata [TBA]
 
 public struct GestureOutputMetadata: Sendable {
-    public var updatesToSchedule: [UpdateRequest]
-    public var updatesToCancel: [UpdateRequest]
+    package var updatesToSchedule: [UpdateRequest]
+    package var updatesToCancel: [UpdateRequest]
     public var traceAnnotation: UpdateTraceAnnotation?
 
-    public init(
+    package init(
         updatesToSchedule: [UpdateRequest] = [],
         updatesToCancel: [UpdateRequest] = [],
         traceAnnotation: UpdateTraceAnnotation? = nil
@@ -79,7 +85,7 @@ public struct GestureOutputMetadata: Sendable {
     }
 }
 
-// MARK: - GestureOutputMetadata + NestedCustomStringConvertible
+// MARK: - GestureOutputMetadata + NestedCustomStringConvertible [TBA]
 
 extension GestureOutputMetadata: NestedCustomStringConvertible {
     package func populateNestedDescription(_ nested: inout NestedDescription) {
@@ -108,16 +114,7 @@ public struct UpdateTraceAnnotation: Sendable {
     }
 }
 
-// MARK: - UpdateRequest
-
-public struct UpdateRequest: Hashable, Sendable, Identifiable {
-    public let id: UInt32
-    public let creationTime: Timestamp
-    public let targetTime: Timestamp
-    public let tag: String?
-}
-
-// MARK: - GestureOutputStatus
+// MARK: - GestureOutputStatus [TBA]
 
 public enum GestureOutputStatus: Hashable, Sendable {
     case empty
@@ -125,7 +122,7 @@ public enum GestureOutputStatus: Hashable, Sendable {
     case finalValue
 }
 
-// MARK: - GestureOutputStatusCombiner
+// MARK: - GestureOutputStatusCombiner [TBA]
 
 public struct GestureOutputStatusCombiner: Sendable {
     public var combine: @Sendable ([GestureOutputStatus]) throws -> GestureOutputStatus
@@ -135,7 +132,7 @@ public struct GestureOutputStatusCombiner: Sendable {
     }
 }
 
-// MARK: - GestureOutputArrayCombiner
+// MARK: - GestureOutputArrayCombiner [TBA]
 
 public struct GestureOutputArrayCombiner<A: Sendable>: Sendable {
     public let statusCombiner: GestureOutputStatusCombiner
@@ -145,7 +142,7 @@ public struct GestureOutputArrayCombiner<A: Sendable>: Sendable {
     }
 }
 
-// MARK: - GestureOutputCombiner
+// MARK: - GestureOutputCombiner [TBA]
 
 public struct GestureOutputCombiner<each A: Sendable, B: Sendable>: Sendable {
     public let combineValues: (@Sendable (repeat each A) throws -> B)?
