@@ -67,12 +67,12 @@ public enum GestureOutputEmptyReason: Hashable, Sendable {
     case timeUpdate
 }
 
-// MARK: - GestureOutputMetadata [TBA]
+// MARK: - GestureOutputMetadata
 
 public struct GestureOutputMetadata: Sendable {
     package var updatesToSchedule: [UpdateRequest]
     package var updatesToCancel: [UpdateRequest]
-    public var traceAnnotation: UpdateTraceAnnotation?
+    package var traceAnnotation: UpdateTraceAnnotation?
 
     package init(
         updatesToSchedule: [UpdateRequest] = [],
@@ -85,7 +85,7 @@ public struct GestureOutputMetadata: Sendable {
     }
 }
 
-// MARK: - GestureOutputMetadata + NestedCustomStringConvertible [TBA]
+// MARK: - GestureOutputMetadata + NestedCustomStringConvertible
 
 extension GestureOutputMetadata: NestedCustomStringConvertible {
     package func populateNestedDescription(_ nested: inout NestedDescription) {
@@ -106,7 +106,7 @@ extension GestureOutputMetadata: NestedCustomStringConvertible {
 
 // MARK: - UpdateTraceAnnotation
 
-public struct UpdateTraceAnnotation: Sendable {
+package struct UpdateTraceAnnotation: Sendable {
     public var value: String
 
     public init(value: String) {
