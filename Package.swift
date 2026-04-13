@@ -137,7 +137,7 @@ let libraryEvolutionCondition = envBoolValue("LIBRARY_EVOLUTION", default: build
 let compatibilityTestCondition = envBoolValue("COMPATIBILITY_TEST", default: false)
 
 let gesturesCondition = envBoolValue("OPENGESTURESSHIMS_GESTURES", default: false)
-let useLocalDeps = envBoolValue("USE_LOCAL_DEPS")
+let useLocalDeps = envBoolValue("USE_LOCAL_DEPS", default: false)
 
 let swiftCorelibsPath = envStringValue("LIB_SWIFT_PATH") ?? "\(Context.packageDirectory)/Sources/SwiftCorelibs/include"
 
@@ -225,6 +225,9 @@ let openGesturesShimsTarget = Target.target(
 
 let openGesturesCompatibilityTestsTarget = Target.testTarget(
     name: "OpenGesturesCompatibilityTests",
+    dependencies: [
+        .product(name: "OpenAttributeGraphShims", package: "OpenAttributeGraph"),
+    ],
     swiftSettings: sharedSwiftSettings
 )
 
@@ -237,6 +240,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/OpenSwiftUIProject/OpenCoreGraphics.git", branch: "main"),
+        .package(url: "https://github.com/OpenSwiftUIProject/OpenAttributeGraph.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
     ],
     targets: [
