@@ -134,10 +134,10 @@ let warningsAsErrorsCondition = envBoolValue("WERROR", default: isXcodeEnv && de
 let releaseVersion = envIntValue("TARGET_RELEASE", default: 2025)
 
 let libraryEvolutionCondition = envBoolValue("LIBRARY_EVOLUTION", default: buildForDarwinPlatform)
-let compatibilityTestCondition = envBoolValue("COMPATIBILITY_TEST", default: true)
+let compatibilityTestCondition = envBoolValue("COMPATIBILITY_TEST", default: false)
 
 let gesturesCondition = envBoolValue("OPENGESTURESSHIMS_GESTURES", default: false)
-let useLocalDeps = envBoolValue("USE_LOCAL_DEPS", default: true)
+let useLocalDeps = envBoolValue("USE_LOCAL_DEPS", default: false)
 
 let swiftCorelibsPath = envStringValue("LIB_SWIFT_PATH") ?? "\(Context.packageDirectory)/Sources/SwiftCorelibs/include"
 

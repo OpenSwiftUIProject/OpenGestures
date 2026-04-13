@@ -36,34 +36,26 @@
 ///   Can transition to `active` when the blocking gesture resolves.
 /// - `ended`: The gesture completed successfully with a final value.
 /// - `failed`: The gesture failed for a specific reason.
-public enum GesturePhase<Value> {
+public enum GesturePhase<Value: Sendable>: Sendable {
 
     /// The gesture is not participating in recognition.
-    @_spi(Private)
     case idle
 
     /// The gesture is evaluating incoming events.
-    @_spi(Private)
     case possible
 
     /// The gesture is recognized but blocked by another gesture.
-    @_spi(Private)
     case blocked(value: Value, blockedBy: GestureNodeID)
 
     /// The gesture is actively recognized and producing values.
-    @_spi(Private)
     case active(value: Value)
 
     /// The gesture completed successfully.
-    @_spi(Private)
     case ended(value: Value)
 
     /// The gesture failed.
-    @_spi(Private)
     case failed(reason: GestureFailureReason)
 }
-
-extension GesturePhase: Sendable where Value: Sendable {}
 
 extension GesturePhase {
     /// Whether the phase is ``idle``.

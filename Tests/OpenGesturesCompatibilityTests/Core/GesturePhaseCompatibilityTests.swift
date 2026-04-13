@@ -5,7 +5,9 @@
 import OpenAttributeGraphShims
 import Testing
 
-// MARK: - GesturePhase Static Constructors
+// MARK: - GesturePhase Static Constructors to fix the link issue
+// Note: we can't use package/@_spi(Private) to hide the case in swiftinterface.
+// Otherwize we'll got a "Will never be executed" warning, and `ptr.load(as: GesturePhase.self)` will result a crash.
 
 extension GesturePhase {
     @inline(__always)
@@ -75,7 +77,6 @@ struct GesturePhaseCompatibilityTests {
         _ isRecognized: Bool,
         _ expectedDescription: String
     ) {
-        // FIXME: The "Will never be executed" is a false warning. And we have no way to disable it now.
         #expect(phase.isIdle == isIdle)
         #expect(phase.isPossible == isPossible)
         #expect(phase.isActive == isActive)
@@ -89,7 +90,6 @@ struct GesturePhaseCompatibilityTests {
 
     // MARK: - mapValue
 
-    #if OPENGESTURES
     @Test
     func mapValue() {
         let active: GesturePhase<Int> = .active(value: 5)
@@ -100,7 +100,6 @@ struct GesturePhaseCompatibilityTests {
         let mappedIdle = idle.mapValue { String($0) }
         #expect(mappedIdle.isIdle == true)
     }
-    #endif
 }
 
 // MARK: - GestureFailureReasonCompatibilityTests
