@@ -12,6 +12,22 @@ package protocol NestedCustomStringConvertible: CustomDebugStringConvertible, Cu
 }
 
 extension NestedCustomStringConvertible {
+    package func populateNestedDescription(_ nested: inout NestedDescription) {
+        let mirror = Mirror(reflecting: self)
+        for child in mirror.children {
+            guard let label = child.label else { continue }
+            var value: Any = child.value
+            if let optional = value as? OptionalProtocol {
+                guard !optional.isNil else { continue }
+                value = optional.value!
+            }
+            if let collection = value as? any Collection {
+                guard !collection.isEmpty else { continue }
+            }
+            nested.append(value, label: label)
+        }
+    }
+
     @_spi(Private)
     public var description: String {
         var nested = NestedDescription(depth: 0, target: self)
