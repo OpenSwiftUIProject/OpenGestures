@@ -24,7 +24,7 @@ extension Never: ScrollEvent {
 
 // MARK: - ConcreteScrollEvent
 
-public struct ConcreteScrollEvent: ScrollEvent {
+public struct ConcreteScrollEvent: ScrollEvent, NestedCustomStringConvertible, Sendable {
     public var id: EventID
     public var phase: EventPhase
     public var timestamp: Timestamp
@@ -48,5 +48,3 @@ public struct ConcreteScrollEvent: ScrollEvent {
         self.acceleratedDelta = acceleratedDelta
     }
 }
-
-extension ConcreteScrollEvent: NestedCustomStringConvertible {}

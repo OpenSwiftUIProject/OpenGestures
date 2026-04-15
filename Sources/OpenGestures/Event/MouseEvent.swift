@@ -1,13 +1,20 @@
+//
+//  MouseEvent.swift
+//  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
+
 public import OpenCoreGraphicsShims
 
 // MARK: - MouseEvent
 
-public struct MouseEvent: SpatialEvent, Sendable {
-    public var id: EventID
-    public var phase: EventPhase
-    public var timestamp: Timestamp
-    public var location: CGPoint
-    public var button: Button
+public struct MouseEvent: SpatialEvent, NestedCustomStringConvertible, Sendable {
+    public let id: EventID
+    public let phase: EventPhase
+    public let timestamp: Timestamp
+    public let location: CGPoint
+    public let button: Button
 
     public init(id: EventID, phase: EventPhase, timestamp: Timestamp, location: CGPoint, button: Button) {
         self.id = id
@@ -17,9 +24,19 @@ public struct MouseEvent: SpatialEvent, Sendable {
         self.button = button
     }
 
-    public enum Button: Hashable, Sendable {
-        case primary
-        case secondary
-        case tertiary
+    // MARK: - Button
+
+    public struct Button: RawRepresentable, Sendable {
+        public let rawValue: Int
+
+        public init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
+
+        public static let primary = Button(rawValue: 1)
+
+        public static let secondary = Button(rawValue: 2)
+
+        public static let tertiary = Button(rawValue: 3)
     }
 }
