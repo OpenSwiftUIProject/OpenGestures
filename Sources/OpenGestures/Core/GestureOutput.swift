@@ -89,17 +89,18 @@ public struct GestureOutputMetadata: Sendable {
 
 extension GestureOutputMetadata: NestedCustomStringConvertible {
     package func populateNestedDescription(_ nested: inout NestedDescription) {
-        nested.options.formUnion([.hideTypeName, .compact])
-        nested.customPrefix = ""
-        nested.customSuffix = ""
-        if !updatesToSchedule.isEmpty {
-            nested.append("\(updatesToSchedule)", label: "updatesToSchedule")
-        }
-        if !updatesToCancel.isEmpty {
-            nested.append("\(updatesToCancel)", label: "updatesToCancel")
-        }
-        if let traceAnnotation {
-            nested.append(traceAnnotation.value, label: "traceAnnotation")
+        let mirror = Mirror(reflecting: self)
+        for child in mirror.children {
+            guard let label = child.label else { continue }
+            var value: Any = child.value
+            if let optional = value as? OptionalProtocol {
+                guard !optional.isNil else { continue }
+                value = optional.value!
+            }
+            if let collection = value as? any Collection {
+                guard !collection.isEmpty else { continue }
+            }
+            nested.append(value, label: label)
         }
     }
 }

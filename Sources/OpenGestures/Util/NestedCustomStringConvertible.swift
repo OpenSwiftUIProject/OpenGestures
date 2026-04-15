@@ -16,10 +16,7 @@ extension NestedCustomStringConvertible {
     public var description: String {
         var nested = NestedDescription(depth: 0, target: self)
         populateNestedDescription(&nested)
-        var result = nested.buildOpening()
-        result += nested.buildBody()
-        result += nested.buildClosing()
-        return result
+        return nested.description
     }
 
     @_spi(Private)
@@ -122,17 +119,23 @@ package struct NestedDescription {
     }
 
     mutating package func append<T>(
-        _ content: @autoclosure () -> T?,
+        _ content: T?,
         label: String? = nil
     ) {
-        guard let content = content() else {
+        guard let content else {
             return
         }
         var result: String = ""
         if let label {
             result += "\(label): "
         }
-        result += "\(content)"
+        if let nestedConvertible = content as? any NestedCustomStringConvertible {
+            var childNested = NestedDescription(depth: depth + 1, target: nestedConvertible)
+            nestedConvertible.populateNestedDescription(&childNested)
+            result += childNested.description
+        } else {
+            result += "\(content)"
+        }
         if !result.isEmpty {
             buffer.append(result)
         }
