@@ -1,6 +1,6 @@
 # OpenGestures
 
-[![codecov](https://codecov.io/gh/OpenSwiftUIProject/OpenGestures/graph/badge.svg)](https://codecov.io/gh/OpenSwiftUIProject/OpenGestures)
+[![codecov](https://codecov.io/gh/OpenSwiftUIProject/OpenGestures/graph/badge.svg?token=2TJZ2OKKDZ)](https://codecov.io/gh/OpenSwiftUIProject/OpenGestures)
 
 OpenGestures is an open source pure Swift gesture recognition engine.
 
