@@ -5,49 +5,31 @@
 import OpenAttributeGraphShims
 import Testing
 
-// MARK: - GesturePhase Static Constructors to fix the link issue
-// Note: we can't use package/@_spi(Private) to hide the case in swiftinterface.
-// Otherwize we'll got a "Will never be executed" warning, and `ptr.load(as: GesturePhase.self)` will result a crash.
+// MARK: - GesturePhase Static Constructors
 
 extension GesturePhase {
-    @inline(__always)
-    private static func make(tag: Int, _ body: (UnsafeMutableRawPointer) -> Void) -> GesturePhase {
-        let layout = MemoryLayout<GesturePhase>.self
-        let ptr = UnsafeMutableRawPointer.allocate(
-            byteCount: layout.size,
-            alignment: layout.alignment
-        )
-        defer { ptr.deallocate() }
-        body(ptr)
-        Metadata(GesturePhase.self).injectEnumTag(tag: UInt32(tag), ptr)
-        return ptr.load(as: GesturePhase.self)
-    }
-
     static func idle() -> GesturePhase {
-        make(tag: 4) { $0.initializeMemory(as: UInt8.self, repeating: 0, count: MemoryLayout<GesturePhase>.size) }
+        makeEnum(tag: 4, payload: ())
     }
 
     static func possible() -> GesturePhase {
-        make(tag: 5) { $0.initializeMemory(as: UInt8.self, repeating: 0, count: MemoryLayout<GesturePhase>.size) }
+        makeEnum(tag: 5, payload: ())
     }
 
     static func active(value: Value) -> GesturePhase {
-        make(tag: 1) { $0.initializeMemory(as: Value.self, repeating: value, count: 1) }
+        makeEnum(tag: 1, payload: value)
     }
 
     static func blocked(value: Value, blockedBy: GestureNodeID) -> GesturePhase {
-        make(tag: 0) { ptr in
-            ptr.initializeMemory(as: Value.self, repeating: value, count: 1)
-            (ptr + MemoryLayout<Value>.stride).initializeMemory(as: GestureNodeID.self, repeating: blockedBy, count: 1)
-        }
+        makeEnum(tag: 0, payload: (value, blockedBy))
     }
 
     static func ended(value: Value) -> GesturePhase {
-        make(tag: 2) { $0.initializeMemory(as: Value.self, repeating: value, count: 1) }
+        makeEnum(tag: 2, payload: value)
     }
 
     static func failed(reason: GestureFailureReason) -> GesturePhase {
-        make(tag: 3) { $0.initializeMemory(as: GestureFailureReason.self, repeating: reason, count: 1) }
+        makeEnum(tag: 3, payload: reason)
     }
 }
 
@@ -99,6 +81,32 @@ struct GesturePhaseCompatibilityTests {
         let idle: GesturePhase<Int> = .idle()
         let mappedIdle = idle.mapValue { String($0) }
         #expect(mappedIdle.isIdle == true)
+    }
+
+    // MARK: - Bridged payload (String Value)
+
+    // These tests carry a refcounted Value through the fixture. The previous
+    // load+deallocate pattern would leak the retain initializeMemory wrote in
+    // place; correct handling round-trips the String without heap corruption.
+
+    @Test
+    func activeWithStringPayload() {
+        let phase = GesturePhase<String>.active(value: "hello")
+        #expect(phase.isActive == true)
+        #expect(phase.mapValue { $0.count }.isActive == true)
+    }
+
+    @Test
+    func blockedWithStringPayload() {
+        // Exercises a two-field payload `(String, GestureNodeID)` where the
+        // String field carries a bridgeObject retain that must survive
+        // initializeWithCopy during array construction.
+        let phase = GesturePhase<String>.blocked(
+            value: "bridged",
+            blockedBy: GestureNodeID(rawValue: 7)
+        )
+        #expect(phase.isBlocked == true)
+        #expect(phase.description == "blocked(by: 7)")
     }
 }
 

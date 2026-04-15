@@ -8,47 +8,19 @@ import Testing
 // MARK: - GestureOutput Static Constructors
 
 extension GestureOutput {
-    @inline(__always)
-    private static func make(tag: Int, _ body: (UnsafeMutableRawPointer) -> Void) -> GestureOutput {
-        let layout = MemoryLayout<GestureOutput>.self
-        let ptr = UnsafeMutableRawPointer.allocate(
-            byteCount: layout.size,
-            alignment: layout.alignment
-        )
-        defer { ptr.deallocate() }
-        body(ptr)
-        Metadata(GestureOutput.self).injectEnumTag(tag: UInt32(tag), ptr)
-        return ptr.load(as: GestureOutput.self)
-    }
-
     // case 0: .empty(reason, metadata:)
     static func empty(_ reason: GestureOutputEmptyReason, metadata: GestureOutputMetadata?) -> GestureOutput {
-        make(tag: 0) { ptr in
-            ptr.initializeMemory(as: UInt8.self, repeating: 0, count: MemoryLayout<GestureOutput>.size)
-            ptr.storeBytes(of: reason, as: GestureOutputEmptyReason.self)
-            let metadataOffset = MemoryLayout<GestureOutputEmptyReason>.stride
-            (ptr + metadataOffset).initializeMemory(as: GestureOutputMetadata?.self, repeating: metadata, count: 1)
-        }
+        makeEnum(tag: 0, payload: (reason, metadata))
     }
 
     // case 1: .value(v, metadata:)
     static func value(_ v: Value, metadata: GestureOutputMetadata?) -> GestureOutput {
-        make(tag: 1) { ptr in
-            ptr.initializeMemory(as: UInt8.self, repeating: 0, count: MemoryLayout<GestureOutput>.size)
-            ptr.initializeMemory(as: Value.self, repeating: v, count: 1)
-            let metadataOffset = MemoryLayout<Value>.stride
-            (ptr + metadataOffset).initializeMemory(as: GestureOutputMetadata?.self, repeating: metadata, count: 1)
-        }
+        makeEnum(tag: 1, payload: (v, metadata))
     }
 
     // case 2: .finalValue(v, metadata:)
     static func finalValue(_ v: Value, metadata: GestureOutputMetadata?) -> GestureOutput {
-        make(tag: 2) { ptr in
-            ptr.initializeMemory(as: UInt8.self, repeating: 0, count: MemoryLayout<GestureOutput>.size)
-            ptr.initializeMemory(as: Value.self, repeating: v, count: 1)
-            let metadataOffset = MemoryLayout<Value>.stride
-            (ptr + metadataOffset).initializeMemory(as: GestureOutputMetadata?.self, repeating: metadata, count: 1)
-        }
+        makeEnum(tag: 2, payload: (v, metadata))
     }
 }
 
@@ -75,5 +47,28 @@ struct GestureOutputCompatibilityTests {
         #expect(output.isFinal == isFinal)
         #expect(output.value == expectedValue)
         #expect("\(output)".contains(descriptionContains))
+    }
+
+    // MARK: - Bridged payload (String Value)
+
+    // Exercises a two-field payload `(String, GestureOutputMetadata?)` where the
+    // String field carries a bridgeObject retain that must survive
+    // initializeWithCopy during array construction. The previous load+deallocate
+    // pattern would leak the retain initializeMemory wrote in place.
+
+    @Test
+    func valueWithStringPayload() {
+        let output = GestureOutput<String>.value("bridged", metadata: nil)
+        #expect(output.isEmpty == false)
+        #expect(output.isFinal == false)
+        #expect(output.value == "bridged")
+    }
+
+    @Test
+    func finalValueWithStringPayload() {
+        let output = GestureOutput<String>.finalValue("bridged-final", metadata: nil)
+        #expect(output.isEmpty == false)
+        #expect(output.isFinal == true)
+        #expect(output.value == "bridged-final")
     }
 }
