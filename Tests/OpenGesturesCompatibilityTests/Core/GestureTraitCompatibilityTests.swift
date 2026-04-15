@@ -23,23 +23,24 @@ struct GestureTraitCompatibilityTests {
     // MARK: - Description
 
     @Test(arguments: [
-        (GestureTrait.pan(), "pan"),
-        (GestureTrait.tap(), "tap"),
-        (GestureTrait.longPress(), "longPress"),
-        (GestureTrait.tap(tapCount: 1), "tap {tapCount: 1}"),
-        (GestureTrait.tap(pointCount: 2), "tap {pointCount: 2}"),
-        (GestureTrait.longPress(maximumMovement: 10.0), "longPress {maximumMovement: 10.0}"),
-    ])
-    func description(_ trait: GestureTrait, _ expectedDescription: String) {
-        #expect("\(trait)" == expectedDescription)
-    }
-
-    @Test
-    func descriptionMultipleAttributes() {
-        let trait = GestureTrait.tap(tapCount: 1, pointCount: 3)
+        (GestureTrait.pan(), "pan", nil),
+        (GestureTrait.tap(), "tap", nil),
+        (GestureTrait.longPress(), "longPress", nil),
+        (GestureTrait.tap(tapCount: 1), "tap {tapCount: 1}", nil),
+        (GestureTrait.tap(pointCount: 2), "tap {pointCount: 2}", nil),
+        (GestureTrait.longPress(maximumMovement: 10.0), "longPress {maximumMovement: 10.0}", nil),
+        // Dictionary ordering of attributes is non-deterministic, so accept either order.
+        (GestureTrait.tap(tapCount: 1, pointCount: 3), nil, #/tap \{(?:tapCount: 1, pointCount: 3|pointCount: 3, tapCount: 1)\}/#),
+    ] as [(GestureTrait, String?, Regex<Substring>?)])
+    func description(_ trait: GestureTrait, _ expected: String?, _ expectedRegex: Regex<Substring>?) throws {
         let description = "\(trait)"
-        // Dictionary ordering of attributes is non-deterministic
-        #expect(description == "tap {tapCount: 1, pointCount: 3}" || description == "tap {pointCount: 3, tapCount: 1}")
+        if let expectedRegex {
+            _ = try #require(description.wholeMatch(of: expectedRegex))
+        } else if let expected {
+            #expect(description == expected)
+        } else {
+            Issue.record("neither expected nor expectedRegex is set")
+        }
     }
 
     // MARK: - GestureTrait Factory Methods
@@ -178,27 +179,21 @@ struct GestureTraitCollectionCompatibilityTests {
     }
 
     @Test(arguments: [
-        (GestureTraitCollection.withTrait(.pan()), "[pan]"),
-        (GestureTraitCollection.withTrait(.tap(tapCount: 1)), "[tap {tapCount: 1}]"),
-    ])
-    func description(_ collection: GestureTraitCollection, _ expectedDescription: String) {
-        #expect("\(collection)" == expectedDescription)
-    }
-
-    @Test
-    func descriptionMultipleAttributes() {
-        let collection = GestureTraitCollection.withTrait(.tap(tapCount: 1, pointCount: 3))
+        (GestureTraitCollection.withTrait(.pan()), "[pan]", nil),
+        (GestureTraitCollection.withTrait(.tap(tapCount: 1)), "[tap {tapCount: 1}]", nil),
+        // Dictionary ordering of attributes is non-deterministic, so accept either order.
+        (GestureTraitCollection.withTrait(.tap(tapCount: 1, pointCount: 3)), nil, #/\[tap \{(?:tapCount: 1, pointCount: 3|pointCount: 3, tapCount: 1)\}\]/#),
+        // Dictionary ordering of traits is non-deterministic, so accept either order.
+        (GestureTraitCollection(traits: [.pan(), .tap()]), nil, #/\[(?:tap, pan|pan, tap)\]/#),
+    ] as [(GestureTraitCollection, String?, Regex<Substring>?)])
+    func description(_ collection: GestureTraitCollection, _ expected: String?, _ expectedRegex: Regex<Substring>?) throws {
         let description = "\(collection)"
-        // Dictionary ordering of attributes is non-deterministic
-        #expect(description == "[tap {tapCount: 1, pointCount: 3}]" || description == "[tap {pointCount: 3, tapCount: 1}]")
-
-    }
-
-    @Test
-    func descriptionMultipleTraits() {
-        let collection = GestureTraitCollection(traits: [.pan(), .tap()])
-        let description = "\(collection)"
-        // Dictionary ordering of traits is non-deterministic
-        #expect(description == "[tap, pan]" || description == "[pan, tap]")
+        if let expectedRegex {
+            _ = try #require(description.wholeMatch(of: expectedRegex))
+        } else if let expected {
+            #expect(description == expected)
+        } else {
+            Issue.record("neither expected nor expectedRegex is set")
+        }
     }
 }
