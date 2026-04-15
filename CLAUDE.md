@@ -1,15 +1,10 @@
 # OpenGestures Development Guide
 
-## Overview
-
-OpenGestures is an open-source reimplementation of Apple's Gestures.framework.
-
 ## Development Workflow
 
 1. Implement feature
-2. Format: `Scripts/format-swift.sh` (when available)
-3. Test: `swift test`
-4. Commit
+2. Test
+3. Commit
 
 ## Build
 
@@ -19,8 +14,19 @@ swift build
 
 ## Test
 
+Three runs cover the full matrix:
+
 ```bash
-swift test
+# 1. Unit tests (OpenGesturesTests)
+swift test --filter OpenGesturesTests
+
+# 2. Compatibility tests against OpenGestures itself (OPENGESTURES_COMPATIBILITY_TEST=0)
+OPENGESTURES_COMPATIBILITY_TEST=0 swift test --filter OpenGesturesCompatibilityTests
+
+# 3. Compatibility tests against Apple's Gestures.framework (OPENGESTURES_COMPATIBILITY_TEST=1)
+#    For local development, also set OPENGESTURES_USE_LOCAL_DEPS=1 so Package.swift resolves
+#    DarwinPrivateFrameworks from ../DarwinPrivateFrameworks instead of the remote git URL.
+OPENGESTURES_COMPATIBILITY_TEST=1 OPENGESTURES_USE_LOCAL_DEPS=1 swift test --filter OpenGesturesCompatibilityTests
 ```
 
 ## Key Environment Variables
