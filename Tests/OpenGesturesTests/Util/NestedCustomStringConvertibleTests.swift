@@ -91,4 +91,46 @@ struct NestedCustomStringConvertibleTests {
         }
         """#)
     }
+
+    // MARK: - Default-Impl Fixtures
+
+    private struct DefaultTestStruct: NestedCustomStringConvertible {
+        var a: Int? = 3
+        var b: Int? = nil
+        var c: [Int] = []
+        var d: [Int] = [1, 2]
+    }
+
+    private struct RecursiveContainer: NestedCustomStringConvertible {
+        var nodes: [TestNode] = []
+    }
+
+    // MARK: - Default Mirror-based populateNestedDescription
+
+    @Test
+    func defaultImplSkipsNilAndEmpty() {
+        let value = DefaultTestStruct()
+        #expect(value.description == #"""
+        DefaultTestStruct { \#("")
+          a: 3
+          d: [1, 2]
+        }
+        """#)
+    }
+
+    @Test
+    func defaultImplRecursesOnNCSCCollection() {
+        let value = RecursiveContainer(nodes: [
+            TestNode(name: "tap"),
+            TestNode(name: "pan"),
+        ])
+        #expect(value.description == #"""
+        RecursiveContainer { \#("")
+          nodes: Array<TestNode> { \#("")
+            tap
+            pan
+          }
+        }
+        """#)
+    }
 }
