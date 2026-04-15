@@ -2,7 +2,7 @@
 
 [![codecov](https://codecov.io/gh/OpenSwiftUIProject/OpenGestures/graph/badge.svg)](https://codecov.io/gh/OpenSwiftUIProject/OpenGestures)
 
-OpenGestures is an open source implementation of Apple's Gestures framework — a pure Swift gesture recognition engine introduced in iOS 26.
+OpenGestures is an open source pure Swift gesture recognition engine.
 
 It powers the underlying gesture handling of [OpenSwiftUI](https://github.com/OpenSwiftUIProject/OpenSwiftUI).
 
@@ -14,8 +14,8 @@ It powers the underlying gesture handling of [OpenSwiftUI](https://github.com/Op
 |[![Ubuntu](https://github.com/OpenSwiftUIProject/OpenGestures/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/OpenSwiftUIProject/OpenGestures/actions/workflows/ubuntu.yml)|
 
 The project is for the following purposes:
-- Add gesture framework support for non-Apple platforms (e.g. Linux, WASI and Windows)
-- Diagnose and debug gesture issues on Apple platforms
+- Add gesture support for non-Apple platforms
+- Diagnose and debug Gestures Framework (introduced on AppleOS 26) issues on Apple platforms
 
 Currently, this project is in early development.
 
