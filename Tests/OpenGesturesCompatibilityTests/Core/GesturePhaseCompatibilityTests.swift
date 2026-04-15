@@ -5,9 +5,7 @@
 import OpenAttributeGraphShims
 import Testing
 
-// MARK: - GesturePhase Static Constructors to fix the link issue
-// Note: we can't use package/@_spi(Private) to hide the case in swiftinterface.
-// Otherwize we'll got a "Will never be executed" warning, and `ptr.load(as: GesturePhase.self)` will result a crash.
+// MARK: - GesturePhase Static Constructors
 
 extension GesturePhase {
     static func idle() -> GesturePhase {

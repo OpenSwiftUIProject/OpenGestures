@@ -21,6 +21,14 @@ extension Metadata {
 /// and injecting the enum tag. The payload is typed as a Swift value (typically
 /// a tuple for multi-field cases, `Void` for no-payload cases) so the compiler
 /// computes the correct field offsets and refcount handling.
+///
+/// This helper exists to manufacture enum values whose cases aren't callable
+/// directly — e.g. compatibility-test targets that link against Apple's
+/// Gestures.framework where case initializers are hidden. Marking those cases
+/// `package` or `@_spi(Private)` to hide them from the swiftinterface is not
+/// an option: the compiler then emits a "Will never be executed" warning for
+/// case-site usage and `ptr.load(as: T.self)` (the previous fixture pattern)
+/// crashes.
 @inline(__always)
 package func makeEnum<T, Payload>(
     tag: Int,
