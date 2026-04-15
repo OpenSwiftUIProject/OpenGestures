@@ -1,34 +1,30 @@
-public import OpenCoreGraphicsShims
+//
+//  Event.swift
+//  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
 
 // MARK: - Event
 
-/// A protocol representing an input event.
-public protocol Event: Sendable {
+public protocol Event: Identifiable {
     var id: EventID { get }
     var phase: EventPhase { get }
+    var timestamp: Timestamp { get }
 }
 
-/// A spatial event with a location.
-public protocol SpatialEvent: Event {
-    var location: CGPoint { get }
+// MARK: - Never + Event
+
+extension Never: Event {
+    public var id: EventID { fatalError() }
+    public var phase: EventPhase { fatalError() }
 }
 
-/// A scroll event with delta values.
-public protocol ScrollEvent: Event {
-    var delta: CGVector { get }
-    var acceleratedDelta: CGVector { get }
-}
+// MARK: - EventPhase
 
-// MARK: - EventID
-
-public struct EventID: Hashable, Sendable, CustomStringConvertible {
-    public var rawValue: Int
-
-    public init(rawValue: Int) {
-        self.rawValue = rawValue
-    }
-
-    public var description: String {
-        "EventID(\(rawValue))"
-    }
+public enum EventPhase: Hashable, Sendable {
+    case began
+    case active
+    case ended
+    case failed
 }

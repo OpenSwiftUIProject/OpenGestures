@@ -1,8 +1,15 @@
+//
+//  TouchEvent.swift
+//  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
+
 public import OpenCoreGraphicsShims
 
 // MARK: - TouchEvent
 
-public struct TouchEvent: SpatialEvent, Sendable {
+public struct TouchEvent: SpatialEvent, NestedCustomStringConvertible, Sendable {
     public var id: EventID
     public var phase: EventPhase
     public var timestamp: Timestamp
