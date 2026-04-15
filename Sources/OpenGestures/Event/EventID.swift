@@ -7,7 +7,7 @@
 
 // MARK: - EventID
 
-public struct EventID: Hashable, CustomStringConvertible {
+public struct EventID: Hashable, CustomStringConvertible, Sendable {
     public let rawValue: Int
 
     public init(rawValue: Int) {

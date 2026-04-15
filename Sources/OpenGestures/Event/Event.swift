@@ -22,7 +22,7 @@ extension Never: Event {
 
 // MARK: - EventPhase
 
-public enum EventPhase: Hashable {
+public enum EventPhase: Hashable, Sendable {
     case began
     case active
     case ended
