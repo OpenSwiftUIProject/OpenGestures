@@ -11,8 +11,11 @@ public final class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Send
     private var _didUpdatePhase: ((GesturePhase<Value>, GesturePhase<Value>) -> Void)?
     private var _shouldActivate: (() -> Bool)?
 
-    public private(set) var phase: GesturePhase<Value> = .idle
-    public private(set) var latestPhase: GesturePhase<Value> = .idle
+    package var phaseQueue: GesturePhaseQueue<Value> = GesturePhaseQueue(
+        timeSource: nil,
+        currentPhase: .idle,
+        pendingPhases: RingBuffer(capacity: 5, emptyValue: .idle)
+    )
 
     // MARK: - Init
 
@@ -39,14 +42,10 @@ public final class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Send
     // MARK: - Update
 
     public func update(value: Value, isFinalUpdate: Bool) throws {
-        let oldPhase = phase
-        if isFinalUpdate {
-            phase = .ended(value: value)
-        } else {
-            phase = .active(value: value)
-        }
-        latestPhase = phase
-        _didUpdatePhase?(phase, oldPhase)
+        let oldPhase = phaseQueue.currentPhase
+        let newPhase: GesturePhase<Value> = isFinalUpdate ? .ended(value: value) : .active(value: value)
+        phaseQueue.currentPhase = newPhase
+        _didUpdatePhase?(newPhase, oldPhase)
     }
 
     public override func update(someValue: Any, isFinalUpdate: Bool) throws {
@@ -59,17 +58,17 @@ public final class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Send
     // MARK: - Abort / Fail
 
     public override func abort() throws {
-        let oldPhase = phase
-        phase = .failed(reason:.aborted)
-        latestPhase = phase
-        _didUpdatePhase?(phase, oldPhase)
+        let oldPhase = phaseQueue.currentPhase
+        let newPhase: GesturePhase<Value> = .failed(reason: .aborted)
+        phaseQueue.currentPhase = newPhase
+        _didUpdatePhase?(newPhase, oldPhase)
     }
 
     public override func fail(with error: Error) throws {
-        let oldPhase = phase
+        let oldPhase = phaseQueue.currentPhase
         // TODO: .error(Error) case once non-Sendable handling resolved
-        phase = .failed(reason:.aborted)
-        latestPhase = phase
-        _didUpdatePhase?(phase, oldPhase)
+        let newPhase: GesturePhase<Value> = .failed(reason: .aborted)
+        phaseQueue.currentPhase = newPhase
+        _didUpdatePhase?(newPhase, oldPhase)
     }
 }
