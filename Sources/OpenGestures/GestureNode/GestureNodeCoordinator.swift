@@ -1,7 +1,8 @@
 // MARK: - GestureNodeCoordinator
 
 /// Central coordinator that manages gesture node updates and conflict resolution.
-public final class GestureNodeCoordinator: @unchecked Sendable {
+@objc
+public final class GestureNodeCoordinator: NSObject, @unchecked Sendable {
 
     // MARK: - Callbacks
 
@@ -9,13 +10,32 @@ public final class GestureNodeCoordinator: @unchecked Sendable {
     public var willProcessUpdateQueue: (() -> Void)?
     public var didUpdate: (() -> Void)?
 
-    // MARK: - Internal State
+    // MARK: - Tracked Nodes
+
+    /// All nodes this coordinator currently owns.
+    private var nodes: Set<AnyGestureNode> = []
+
+    // MARK: - Configuration
 
     private let timeSource: any TimeSource
-    private let updateDriver: (any GestureUpdateDriver)?
-    private let shouldTrackTransitiveDependencies: Bool
-    private var nodes: Set<ObjectIdentifier> = []
-    private var _nodeRefs: [AnyGestureNode] = []
+
+    // MARK: - Conflict Resolution
+
+    private let failureDependencyGraph = FailureDependencyGraph()
+    private var exclusionPool = ExclusionPool()
+
+    // MARK: - Pending Work
+
+    private var nodesNeedingUpdate: Set<AnyGestureNode> = []
+    private var nodesNeedingReset: Set<AnyGestureNode> = []
+    private var isProcessingUpdates: Bool = false
+    private var synchronousNodeUpdates: [GestureNodeID] = []
+
+    // MARK: - Update Driver
+
+    private let updateDriver: any GestureUpdateDriver
+    private var updateDriverToken: GestureUpdateDriverToken?
+    private var resetTracker: SubgraphResetTracker = SubgraphResetTracker()
 
     // MARK: - Init
 
@@ -24,57 +44,34 @@ public final class GestureNodeCoordinator: @unchecked Sendable {
         updateDriver: (any GestureUpdateDriver)? = nil,
         shouldTrackTransitiveDependencies: Bool = false
     ) {
-        self.timeSource = timeSource
-        self.updateDriver = updateDriver
-        self.shouldTrackTransitiveDependencies = shouldTrackTransitiveDependencies
-    }
-
-    // MARK: - Node Management
-
-    func addNode(_ node: AnyGestureNode) {
-        let oid = ObjectIdentifier(node)
-        if nodes.insert(oid).inserted {
-            _nodeRefs.append(node)
-        }
-    }
-
-    func removeNode(_ node: AnyGestureNode) {
-        let oid = ObjectIdentifier(node)
-        if nodes.remove(oid) != nil {
-            _nodeRefs.removeAll { $0 === node }
-        }
+        // TODO
+        fatalError("TODO")
     }
 
     // MARK: - Update Dispatch
 
-    /// Enqueues updates for the given nodes.
     public func enqueueUpdates(
         nodes: [AnyGestureNode],
         reason: String,
         closure: (AnyGestureNode) -> Void
     ) {
+        // TODO
+        willUpdate?()
         for node in nodes {
             guard !node.options.contains(.isDisabled),
                   node.container != nil else {
                 continue
             }
             closure(node)
+            nodesNeedingUpdate.insert(node)
         }
     }
 
-    /// Processes all queued updates.
     public func processUpdates(reason: String) {
-        willProcessUpdateQueue?()
-        willUpdate?()
-        // TODO: Actual update processing — iterate queued phase transitions,
-        //       run ExclusionPool + FailureDependencyGraph resolution
-        didUpdate?()
-    }
-
-    deinit {
-        // Clear coordinator back-refs on all managed nodes
-        for _ in _nodeRefs {
-            // node's coordinator back-ref would be cleared here
-        }
+        // TODO
     }
 }
+
+// TODO: SubgraphResetTracker
+
+struct SubgraphResetTracker {}
