@@ -2,7 +2,7 @@
 //  RingBufferTests.swift
 //  OpenGesturesTests
 
-@_spi(Private) import OpenGestures
+import OpenGestures
 import Testing
 
 // MARK: - RingBufferTests
