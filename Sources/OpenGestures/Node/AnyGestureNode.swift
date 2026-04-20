@@ -3,7 +3,7 @@ import Foundation
 // MARK: - AnyGestureNode
 
 /// Type-erased base class for gesture nodes.
-open class AnyGestureNode: Hashable, Identifiable, @unchecked Sendable {
+open class AnyGestureNode: Identifiable, Hashable, @unchecked Sendable {
 
     // MARK: - Static ID counter
 
@@ -14,13 +14,13 @@ open class AnyGestureNode: Hashable, Identifiable, @unchecked Sendable {
     public let id: GestureNodeID
     public var tag: GestureTag?
     public var traits: GestureTraitCollection?
-    public var options: GestureNodeOptions
-    public weak var container: (any GestureNodeContainer)?
+    open var options: GestureNodeOptions
+    open weak var container: (any GestureNodeContainer)?
     private var _trackedEventIDs: Set<EventID> = []
 
     // MARK: - Init
 
-    public init(
+    package init(
         traits: GestureTraitCollection? = nil,
         tag: GestureTag? = nil,
         relations: [GestureRelation] = []
@@ -39,7 +39,7 @@ open class AnyGestureNode: Hashable, Identifiable, @unchecked Sendable {
 
     package var relationMap = RelationMap()
 
-    public var relations: [GestureRelation] {
+    open var relations: [GestureRelation] {
         relationMap.toRelations()
     }
 
@@ -80,14 +80,13 @@ open class AnyGestureNode: Hashable, Identifiable, @unchecked Sendable {
     // MARK: - Update / Abort / Fail
 
     /// Type-erased update. Subclass (GestureNode<T>) overrides.
-    open func update(someValue: Any, isFinalUpdate: Bool) throws {
+    open func update<T>(someValue: T, isFinalUpdate: Bool) throws {
         fatalError("Subclass must override")
     }
 
     /// Aborts the gesture, setting phase to .failed(.aborted).
     open func abort() throws {
-        // Constructs .failed(.aborted) and dispatches
-        fatalError("Subclass must override")
+        try fail(with: _GestureAbortError())
     }
 
     /// Fails the gesture with an error.
@@ -98,26 +97,36 @@ open class AnyGestureNode: Hashable, Identifiable, @unchecked Sendable {
     // MARK: - Debug
 
     public var debugLabel: String {
-        "\(type(of: self))(\(id))"
+        let address = String(UInt(bitPattern: ObjectIdentifier(self)), radix: 16)
+        return "\(type(of: self)) <0x\(address) \(id)>"
     }
 
-    // MARK: - Hashable / Equatable
+}
 
+// MARK: - Hashable / Comparable
+
+extension AnyGestureNode {
     public static func == (lhs: AnyGestureNode, rhs: AnyGestureNode) -> Bool {
-        lhs.id == rhs.id
+        lhs === rhs
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine(ObjectIdentifier(self))
     }
 }
-
-// MARK: - Comparable
 
 extension AnyGestureNode: Comparable {
     public static func < (lhs: AnyGestureNode, rhs: AnyGestureNode) -> Bool {
         lhs.id < rhs.id
     }
+}
+
+// MARK: - _GestureAbortError
+
+/// Internal sentinel error dispatched through `fail(with:)` when a gesture is
+/// aborted via `AnyGestureNode.abort()`.
+package struct _GestureAbortError: Error {
+    package init() {}
 }
 
 // MARK: - ManagedAtomic (minimal)
