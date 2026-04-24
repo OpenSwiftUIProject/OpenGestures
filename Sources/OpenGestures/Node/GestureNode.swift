@@ -171,7 +171,7 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
 
     public weak var delegate: (any GestureNodeDelegate<Value>)?
 
-    package var phaseQueue: GesturePhaseQueue<Value>
+    private var phaseQueue: GesturePhaseQueue<Value>
 
     // MARK: - Init
 
@@ -187,6 +187,33 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
 
     public convenience init() {
         self.init(traits: nil, tag: nil, relations: .default)
+    }
+
+    public override var options: GestureNodeOptions {
+        get { super.options }
+        set {
+            let oldValue = super.options
+            super.options = newValue
+            didChangeOptions(from: oldValue)
+        }
+    }
+
+    private func didChangeOptions(from oldOptions: GestureNodeOptions) {
+        guard options.contains(.isDisabled) != oldOptions.contains(.isDisabled) else { return }
+        try? update(reason: .disabled, isFinalUpdate: true)
+    }
+
+    public override var container: (any GestureNodeContainer)? {
+        get { super.container }
+        set {
+            super.container = newValue
+            didChangeContainer()
+        }
+    }
+
+    private func didChangeContainer() {
+        guard container == nil else { return }
+        try? update(reason: .removedFromContainer, isFinalUpdate: true)
     }
 
     // MARK: - Phase

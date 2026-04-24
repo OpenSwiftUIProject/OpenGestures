@@ -14,9 +14,11 @@ public struct GestureNodeOptions: OptionSet, Sendable {
         self.rawValue = rawValue
     }
 
-    public static let isDisabled = GestureNodeOptions(rawValue: 0x1)
-    public static let disallowExclusionWithUnresolvedFailureRequirements = GestureNodeOptions(rawValue: 0x2)
-    public static let isGloballyScoped = GestureNodeOptions(rawValue: 0x4)
+    public static let isDisabled: GestureNodeOptions = .init(rawValue: 1 << 0)
+
+    public static let disallowExclusionWithUnresolvedFailureRequirements: GestureNodeOptions = .init(rawValue: 1 << 1)
+
+    public static let isGloballyScoped: GestureNodeOptions = .init(rawValue: 1 << 2)
 }
 
 // MARK: - GestureNodeOptions + CustomStringConvertible
