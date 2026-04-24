@@ -206,7 +206,9 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
     }
 
     public override func addRelation(_ relation: GestureRelation) {
-        relationMap.addRelation(relation)
+        let changed = relationMap.addRelation(relation)
+        guard changed, listener != nil else { return }
+        // TODO: listener
     }
 
     public override func addRelations(_ relations: [GestureRelation]) {
@@ -216,7 +218,9 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
     }
 
     public override func removeRelation(_ relation: GestureRelation) {
-        relationMap.removeRelation(relation)
+        let changed = relationMap.removeRelation(relation)
+        guard changed, listener != nil else { return }
+        // TODO: listener
     }
 
     public override func removeRelations(_ relations: [GestureRelation]) {

@@ -3,7 +3,7 @@
 //  OpenGestures
 //
 //  Audited for 9126.1.5
-//  Status: WIP
+//  Status: Blocked by GestureNodeListener
 
 // MARK: - GestureNodeContainer
 
@@ -17,7 +17,21 @@ public protocol GestureNodeContainer: AnyObject, Sendable {
 // MARK: - GestureNodeListener [WIP]
 
 package protocol GestureNodeListener: AnyObject {
+//    func gestureNode(
+//        _ node: AnyGestureNode,
+//        didAddRelation relation: GestureRelation,
+//        target matcher: GestureNodeMatcher
+//    )
+//
+//    func gestureNode(
+//        _ node: AnyGestureNode,
+//        didRemoveRelation relation: GestureRelation,
+//        target matcher: GestureNodeMatcher
+//    )
+
     // TODO
 }
 
-// TODO: GestureNodeCoordinator: GestureNodeListener
+extension GestureNodeCoordinator: GestureNodeListener {
+    // TODO
+}
