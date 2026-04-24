@@ -14,9 +14,9 @@ package struct GesturePhaseQueue<Value: Sendable> {
     package var pendingPhases: RingBuffer<GesturePhase<Value>>
 
     package init(
-        timeSource: (any TimeSource)?,
-        currentPhase: GesturePhase<Value>,
-        pendingPhases: RingBuffer<GesturePhase<Value>>
+        timeSource: (any TimeSource)? = nil,
+        currentPhase: GesturePhase<Value> = .idle,
+        pendingPhases: RingBuffer<GesturePhase<Value>> = .init(capacity: 5, emptyValue: .idle)
     ) {
         self.timeSource = timeSource
         self.currentPhase = currentPhase
@@ -39,4 +39,3 @@ extension GesturePhaseQueue {
 }
 
 extension GesturePhaseQueue.InvalidTransition: NestedCustomStringConvertible {}
-

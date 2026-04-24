@@ -1,64 +1,57 @@
+//
+//  GestureNode.swift
+//  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: WIP
+
 import Foundation
 import Synchronization
 
-// MARK: - AnyGestureNode [WIP]
+// MARK: - AnyGestureNode
 
 /// Type-erased base class for gesture nodes.
-
-open class AnyGestureNode: Identifiable, Hashable, @unchecked Sendable {
+open class AnyGestureNode: Identifiable, @unchecked Sendable {
 
     // MARK: - Static ID counter
 
-    /// Monotonically increasing node-ID allocator. Apple's `Gestures.framework`
-    /// stores the counter in a plain static `UInt32` protected by `swift_once`
-    /// and bumps it via an ARM64 CAS loop with trap-on-overflow semantics;
-    /// `Synchronization.Atomic<UInt32>` reproduces that pattern directly.
-    private static let _nextID = Atomic<UInt32>(0)
+    private static let counter = Atomic<UInt32>(0)
 
-    package static func _allocateID() -> UInt32 {
-        var current = _nextID.load(ordering: .relaxed)
-        while true {
-            let next = current + 1
-            let (exchanged, actual) = _nextID.compareExchange(
-                expected: current, desired: next, ordering: .relaxed
-            )
-            if exchanged { return next }
-            current = actual
-        }
+    @inline(__always)
+    private static func makeUniqueID() -> UInt32 {
+        let (_, id) = counter.add(1, ordering: .relaxed)
+        return id
     }
 
     // MARK: - Stored Properties
 
-    public let id: GestureNodeID
+    public let id: GestureNodeID = GestureNodeID(rawValue: makeUniqueID())
     public var tag: GestureTag?
     public var traits: GestureTraitCollection?
-    open var options: GestureNodeOptions
+    open var options: GestureNodeOptions = []
     open weak var container: (any GestureNodeContainer)?
     package var timeSource: (any TimeSource)?
     package unowned var context: AnyObject?
-    package var debuglabelProvider: ((AnyGestureNode) -> String)?
+    package var debugLabelProvider: ((AnyGestureNode) -> String)?
     package unowned var listener: (any GestureNodeListener)?
-    package var relationMap: RelationMap
+    package var relationMap: RelationMap = RelationMap()
     package var trackedEvents: Set<EventID> = []
 
-    // MARK: - Init [WIP]
+    // MARK: - Init
 
     package init(
         traits: GestureTraitCollection? = nil,
         tag: GestureTag? = nil,
         relations: [GestureRelation] = []
     ) {
-        self.id = GestureNodeID(rawValue: Self._allocateID())
         self.tag = tag
         self.traits = traits
-        self.options = []
         for relation in relations {
             addRelation(relation)
         }
     }
 
     // MARK: - Relations
-
 
     open var relations: [GestureRelation] {
         relationMap.toRelations()
@@ -88,49 +81,66 @@ open class AnyGestureNode: Identifiable, Hashable, @unchecked Sendable {
 
     public func startTrackingEvents(with eventIDs: [EventID]) {
         for id in eventIDs {
-            _trackedEventIDs.insert(id)
+            trackedEvents.insert(id)
         }
     }
 
     public func stopTrackingEvents(with eventIDs: [EventID]) {
         for id in eventIDs {
-            _trackedEventIDs.remove(id)
+            trackedEvents.remove(id)
         }
     }
 
-    // MARK: - Update / Abort / Fail
+    // MARK: - Update / Abort / Fail [WIP]
 
-    /// Type-erased update. Subclass (`GestureNode<Value>`) overrides.
     open func update<T>(someValue: T, isFinalUpdate: Bool) throws {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    /// Aborts the gesture, transitioning its phase to
-    /// `.failed(reason: .aborted)`. Apple's `abort()` (at 0x26358) is a
-    /// direct-dispatch method that invokes an overridable vtable slot rather
-    /// than routing through `fail(with:)`; `GestureNode<Value>` provides the
-    /// concrete override.
-    open func abort() throws {
+    public final func abort() throws {
+        try _abort()
+    }
+
+    package func _abort() throws {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    /// Fails the gesture with an error.
     open func fail(with error: Error) throws {
         _openGesturesBaseClassAbstractMethod()
     }
 
     // MARK: - Debug
 
-    public var debugLabel: String {
-        let address = String(UInt(bitPattern: ObjectIdentifier(self)), radix: 16)
-        return "\(type(of: self)) <0x\(address) \(id)>"
+    public final var debugLabel: String {
+        var parts: [String] = []
+        let label: String
+        if let debugLabelProvider {
+            label = debugLabelProvider(self)
+        } else {
+            let address = String(UInt(bitPattern: ObjectIdentifier(self)), radix: 16, uppercase: false)
+            label = "\(type(of: self)): 0x\(address)"
+        }
+        parts.append(label)
+        if let tag {
+            parts.append(tag.description)
+        }
+        var pairs: [(String, String)] = []
+        pairs.append(("id", id.description))
+        pairs.append(("phase", describePhaseQueue()))
+        let header = parts.joined(separator: " ")
+        let pairResult = pairs.map { $0 + " = " + $1 }.joined(separator: "; ")
+        return "<" + header + "; " + pairResult + ">"
     }
 
+    // FIXME
+    package func describePhaseQueue() -> String {
+        ""
+    }
 }
 
 // MARK: - Hashable / Comparable
 
-extension AnyGestureNode {
+extension AnyGestureNode: Hashable {
     public static func == (lhs: AnyGestureNode, rhs: AnyGestureNode) -> Bool {
         lhs === rhs
     }
@@ -142,60 +152,53 @@ extension AnyGestureNode {
 
 extension AnyGestureNode: Comparable {
     public static func < (lhs: AnyGestureNode, rhs: AnyGestureNode) -> Bool {
-        lhs.id < rhs.id
+        guard let lhsContainer = lhs.container,
+              let rhsContainer = rhs.container else {
+            return rhs.container != nil
+        }
+        guard lhsContainer === rhsContainer else {
+            return rhsContainer.isDeeper(than: lhsContainer, referenceNode: lhs)
+        }
+        guard let lhsIndex = lhsContainer.index(of: lhs),
+              let rhsIndex = rhsContainer.index(of: rhs) else {
+            return false
+        }
+        return lhsIndex < rhsIndex
     }
 }
 
 // MARK: - GestureNode [WIP]
 
-/// A concrete gesture node with a typed Value.
-///
-/// Non-final so application code can subclass. Apple's symbol table exposes
-/// dispatch thunks and a method-lookup function, confirming the class is
-/// designed to be subclassed.
 public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
 
     // MARK: - Stored Properties
 
-    /// Weak reference to the typed delegate. Primary associated type on
-    /// `GestureNodeDelegate<Value>` lets us spell this directly.
     public weak var delegate: (any GestureNodeDelegate<Value>)?
 
-    package var phaseQueue: GesturePhaseQueue<Value> = GesturePhaseQueue(
-        timeSource: nil,
-        currentPhase: .idle,
-        pendingPhases: RingBuffer(capacity: 5, emptyValue: .idle)
-    )
+    package var phaseQueue: GesturePhaseQueue<Value>
 
     // MARK: - Init
 
     public override init(
-        traits: GestureTraitCollection? = nil,
-        tag: GestureTag? = nil,
-        relations: [GestureRelation] = []
+        traits: GestureTraitCollection?,
+        tag: GestureTag?,
+        relations: [GestureRelation]
     ) {
+        delegate = nil
+        phaseQueue = .init()
         super.init(traits: traits, tag: tag, relations: relations)
     }
 
-    /// Zero-arg convenience init. Apple exposes `__allocating_init()` on
-    /// `GestureNode<A>`.
     public convenience init() {
-        self.init(traits: nil, tag: nil, relations: [])
+        self.init(traits: nil, tag: nil, relations: .default)
     }
 
     // MARK: - Phase
 
-    /// The currently committed phase, as observed after the last
-    /// `processUpdates` drain.
     public var phase: GesturePhase<Value> {
         phaseQueue.currentPhase
     }
 
-    /// The most recently enqueued phase. May differ from `phase` between
-    /// `enqueueUpdates` and the next `processUpdates` drain.
-    ///
-    /// TODO: track the pending tail separately once the coordinator's resolve
-    /// logic splits committed and pending phases.
     public var latestPhase: GesturePhase<Value> {
         phaseQueue.currentPhase
     }
@@ -218,7 +221,7 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
 
     // MARK: - Abort / Fail
 
-    public override func abort() throws {
+    package override func _abort() throws {
         let oldPhase = phaseQueue.currentPhase
         let newPhase: GesturePhase<Value> = .failed(reason: .aborted)
         phaseQueue.currentPhase = newPhase
@@ -230,5 +233,12 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
         let newPhase: GesturePhase<Value> = .failed(reason: .custom(error))
         phaseQueue.currentPhase = newPhase
         delegate?.gestureNode(self, didUpdatePhase: newPhase, oldPhase: oldPhase)
+    }
+
+    // MARK: - Debug
+
+    // FIXME
+    package override func describePhaseQueue() -> String {
+        "\(phaseQueue.currentPhase)"
     }
 }
