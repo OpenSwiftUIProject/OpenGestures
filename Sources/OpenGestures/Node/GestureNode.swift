@@ -248,11 +248,7 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
     }
 
     public override func fail(with error: Error) throws {
-        // FIXME
-        let oldPhase = phaseQueue.currentPhase
-        let newPhase: GesturePhase<Value> = .failed(reason: .custom(error))
-        phaseQueue.currentPhase = newPhase
-        delegate?.gestureNode(self, didUpdatePhase: newPhase, oldPhase: oldPhase)
+        try update(reason: .custom(error), isFinalUpdate: false)
     }
 
     public override func update(reason: GestureFailureReason, isFinalUpdate: Bool) throws {
