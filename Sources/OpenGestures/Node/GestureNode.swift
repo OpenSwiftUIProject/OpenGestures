@@ -54,27 +54,23 @@ open class AnyGestureNode: Identifiable, @unchecked Sendable {
     // MARK: - Relations
 
     open var relations: [GestureRelation] {
-        relationMap.toRelations()
+        _openGesturesBaseClassAbstractMethod()
     }
 
     open func addRelation(_ relation: GestureRelation) {
-        relationMap.addRelation(relation)
-    }
-
-    open func removeRelation(_ relation: GestureRelation) {
-        relationMap.removeRelation(relation)
+        _openGesturesBaseClassAbstractMethod()
     }
 
     open func addRelations(_ relations: [GestureRelation]) {
-        for relation in relations {
-            addRelation(relation)
-        }
+        _openGesturesBaseClassAbstractMethod()
+    }
+
+    open func removeRelation(_ relation: GestureRelation) {
+        _openGesturesBaseClassAbstractMethod()
     }
 
     open func removeRelations(_ relations: [GestureRelation]) {
-        for relation in relations {
-            removeRelation(relation)
-        }
+        _openGesturesBaseClassAbstractMethod()
     }
 
     // MARK: - Event Tracking
@@ -200,7 +196,33 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
     }
 
     public var latestPhase: GesturePhase<Value> {
-        phaseQueue.currentPhase
+        phaseQueue.pendingPhases.last ?? phase
+    }
+
+    // MARK: - Relations
+
+    public override var relations: [GestureRelation] {
+        relationMap.toRelations()
+    }
+
+    public override func addRelation(_ relation: GestureRelation) {
+        relationMap.addRelation(relation)
+    }
+
+    public override func addRelations(_ relations: [GestureRelation]) {
+        for relation in relations {
+            addRelation(relation)
+        }
+    }
+
+    public override func removeRelation(_ relation: GestureRelation) {
+        relationMap.removeRelation(relation)
+    }
+
+    public override func removeRelations(_ relations: [GestureRelation]) {
+        for relation in relations {
+            removeRelation(relation)
+        }
     }
 
     // MARK: - Update
