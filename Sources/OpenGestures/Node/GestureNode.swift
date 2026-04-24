@@ -87,22 +87,22 @@ open class AnyGestureNode: Identifiable, @unchecked Sendable {
         }
     }
 
-    // MARK: - Update / Abort / Fail [WIP]
+    // MARK: - Update [WIP]
 
     open func update<T>(someValue: T, isFinalUpdate: Bool) throws {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    public final func abort() throws {
-        try _abort()
-    }
-
-    package func _abort() throws {
-        _openGesturesBaseClassAbstractMethod()
-    }
-
     open func fail(with error: Error) throws {
         _openGesturesBaseClassAbstractMethod()
+    }
+
+    open func update(reason: GestureFailureReason, isFinalUpdate: Bool) throws {
+        _openGesturesBaseClassAbstractMethod()
+    }
+
+    public final func abort() throws {
+        try update(reason: .aborted, isFinalUpdate: true)
     }
 
     // MARK: - Debug
@@ -229,9 +229,10 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
         }
     }
 
-    // MARK: - Update
+    // MARK: - Update [WIP]
 
     public func update(value: Value, isFinalUpdate: Bool) throws {
+        // FIXME
         let oldPhase = phaseQueue.currentPhase
         let newPhase: GesturePhase<Value> = isFinalUpdate ? .ended(value: value) : .active(value: value)
         phaseQueue.currentPhase = newPhase
@@ -239,26 +240,23 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
     }
 
     public override func update<T>(someValue: T, isFinalUpdate: Bool) throws {
+        // FIXME
         guard let typedValue = someValue as? Value else {
             fatalError("Type mismatch: expected \(Value.self), got \(type(of: someValue))")
         }
         try update(value: typedValue, isFinalUpdate: isFinalUpdate)
     }
 
-    // MARK: - Abort / Fail
-
-    package override func _abort() throws {
-        let oldPhase = phaseQueue.currentPhase
-        let newPhase: GesturePhase<Value> = .failed(reason: .aborted)
-        phaseQueue.currentPhase = newPhase
-        delegate?.gestureNode(self, didUpdatePhase: newPhase, oldPhase: oldPhase)
-    }
-
     public override func fail(with error: Error) throws {
+        // FIXME
         let oldPhase = phaseQueue.currentPhase
         let newPhase: GesturePhase<Value> = .failed(reason: .custom(error))
         phaseQueue.currentPhase = newPhase
         delegate?.gestureNode(self, didUpdatePhase: newPhase, oldPhase: oldPhase)
+    }
+
+    public override func update(reason: GestureFailureReason, isFinalUpdate: Bool) throws {
+        // TODO
     }
 
     // MARK: - Debug
