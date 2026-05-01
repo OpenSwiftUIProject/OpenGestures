@@ -1,7 +1,8 @@
+public import Foundation
+
 // MARK: - GestureNodeCoordinator
 
 /// Central coordinator that manages gesture node updates and conflict resolution.
-@objc
 public final class GestureNodeCoordinator: NSObject, @unchecked Sendable {
 
     // MARK: - Callbacks
