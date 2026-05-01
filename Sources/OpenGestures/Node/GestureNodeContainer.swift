@@ -29,9 +29,13 @@ package protocol GestureNodeListener: AnyObject {
 //        target matcher: GestureNodeMatcher
 //    )
 
-    // TODO
+    func gestureNode(
+        _ node: AnyGestureNode,
+        didEnqueuePhaseWithSynchronousUpdate synchronous: Bool
+    )
+
+    // func syncPhaseChange(for node: AnyGestureNode)
 }
 
 extension GestureNodeCoordinator: GestureNodeListener {
-    // TODO
 }

@@ -17,7 +17,7 @@ struct GestureNodeCompatibilityTests {
 //        try node.update(someValue: 3, isFinalUpdate: false)
 
         let label = node.debugLabel
-        let regex = #/\<GestureNode<Double>: 0x[0-9a-f]+ "test"; id = \d+; phase = idle>/#
+        let regex = #/\<GestureNode<Int>: 0x[0-9a-f]+ "test"; id = \d+; phase = idle>/#
         #expect(label.wholeMatch(of: regex) != nil, "\(label) does not match regex")
     }
 

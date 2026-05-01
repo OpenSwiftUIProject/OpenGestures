@@ -67,8 +67,37 @@ public final class GestureNodeCoordinator: NSObject, @unchecked Sendable {
         }
     }
 
-    public func processUpdates(reason: String) {
+//    public func processUpdates(reason: String) {
+//        guard !nodesNeedingUpdate.isEmpty, !isProcessingUpdates else { return }
+//        isProcessingUpdates = true
+//        defer {
+//            synchronousNodeUpdates.removeAll()
+//            isProcessingUpdates = false
+//        }
+//        willProcessUpdateQueue?()
+//        while !nodesNeedingUpdate.isEmpty {
+//            let pendingNodes = nodesNeedingUpdate.sorted()
+//            nodesNeedingUpdate.removeAll()
+//            for node in pendingNodes {
+//                node.processPendingPhaseUpdates()
+//            }
+//        }
+//        didUpdate?()
+//    }
+
+    package func gestureNode(
+        _ node: AnyGestureNode,
+        didEnqueuePhaseWithSynchronousUpdate synchronous: Bool
+    ) {
+        nodesNeedingUpdate.insert(node)
+        guard synchronous else { return }
         // TODO
+        // synchronousNodeUpdates.append(node.id)
+        // syncPhaseChange(for: node)
+    }
+
+    package func syncPhaseChange(for node: AnyGestureNode) {
+        // processUpdates(reason: "syncPhaseChange(for: \(node.id))")
     }
 }
 

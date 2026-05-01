@@ -97,7 +97,12 @@ open class AnyGestureNode: Identifiable, @unchecked Sendable {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    open func update(reason: GestureFailureReason, isFinalUpdate: Bool) throws {
+    package func update(reason: GestureFailureReason, isFinalUpdate: Bool) throws {
+        _openGesturesBaseClassAbstractMethod()
+    }
+
+    @discardableResult
+    package func processPendingPhaseUpdates() -> Bool {
         _openGesturesBaseClassAbstractMethod()
     }
 
@@ -223,7 +228,7 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
     }
 
     public var latestPhase: GesturePhase<Value> {
-        phaseQueue.pendingPhases.last ?? phase
+        phaseQueue.latestPhase
     }
 
     // MARK: - Relations
@@ -256,30 +261,64 @@ public class GestureNode<Value: Sendable>: AnyGestureNode, @unchecked Sendable {
         }
     }
 
-    // MARK: - Update [WIP]
+    // MARK: - Update
 
     public func update(value: Value, isFinalUpdate: Bool) throws {
-        // FIXME
-        let oldPhase = phaseQueue.currentPhase
-        let newPhase: GesturePhase<Value> = isFinalUpdate ? .ended(value: value) : .active(value: value)
-        phaseQueue.currentPhase = newPhase
-        delegate?.gestureNode(self, didUpdatePhase: newPhase, oldPhase: oldPhase)
+        try update(
+            value: value,
+            isFinalUpdate: isFinalUpdate,
+            synchronously: false
+        )
     }
 
     public override func update<T>(someValue: T, isFinalUpdate: Bool) throws {
-        // FIXME
-        guard let typedValue = someValue as? Value else {
-            fatalError("Type mismatch: expected \(Value.self), got \(type(of: someValue))")
-        }
-        try update(value: typedValue, isFinalUpdate: isFinalUpdate)
+        try update(
+            value: unsafeBitCast(someValue, to: Value.self),
+            isFinalUpdate: isFinalUpdate,
+            synchronously: false
+        )
+    }
+
+    private func update(value: Value, isFinalUpdate: Bool, synchronously: Bool) throws {
+        let newPhase: GesturePhase<Value> = isFinalUpdate ? .ended(value: value) : .active(value: value)
+        try enqueuePhase(newPhase, synchronousUpdate: synchronously)
     }
 
     public override func fail(with error: Error) throws {
         try update(reason: .custom(error), isFinalUpdate: false)
     }
 
-    public override func update(reason: GestureFailureReason, isFinalUpdate: Bool) throws {
-        // TODO
+    package override func update(reason: GestureFailureReason, isFinalUpdate: Bool) throws {
+        try enqueuePhase(.failed(reason: reason), synchronousUpdate: isFinalUpdate)
+    }
+
+    private func enqueuePhase(_ phase: GesturePhase<Value>, synchronousUpdate: Bool) throws {
+        var phase = phase
+        if let delegate, phase.isRecognized, phaseQueue.latestPhase.isPossible {
+            let shouldActivate = delegate.gestureNodeShouldActivate(self)
+            if !shouldActivate {
+                phase = .failed(reason: .activationDenied)
+            }
+        }
+        try phaseQueue.enqueue(phase)
+        Log.logEnqueuedPhase(self)
+        listener?.gestureNode(self, didEnqueuePhaseWithSynchronousUpdate: synchronousUpdate) // TBA
+        delegate?.gestureNode(self, didEnqueuePhase: phase)
+    }
+
+    // TBA
+    @discardableResult
+    package override func processPendingPhaseUpdates() -> Bool {
+        var didProcess = false
+        while let transition = phaseQueue.processNextPhase() {
+            delegate?.gestureNode(
+                self,
+                didUpdatePhase: transition.newPhase,
+                oldPhase: transition.oldPhase
+            )
+            didProcess = true
+        }
+        return didProcess
     }
 
     // MARK: - Debug
