@@ -1,77 +1,51 @@
+//
+//  GestureComponent.swift
+//  OpenGestures
+//
+//  Audited for 9126.1.5
+//  Status: Complete
+
 // MARK: - GestureComponent
 
 /// A protocol for gesture recognition components.
 public protocol GestureComponent: Sendable {
     associatedtype Value: Sendable
-
-    func update(context: GestureComponentContext) throws -> GestureOutput<Value>
+    mutating func update(context: GestureComponentContext) throws -> GestureOutput<Value>
     mutating func reset()
     func traits() -> GestureTraitCollection?
     func capacity<E: Event>(for eventType: E.Type) -> Int
 }
 
-// MARK: - Default capacity
+// MARK: - GestureComponent + Tracing
 
 extension GestureComponent {
-    public func capacity<E: Event>(for eventType: E.Type) -> Int { 1 }
-}
-
-// MARK: - StatefulGestureComponent
-
-/// A gesture component that maintains mutable state across updates.
-public protocol StatefulGestureComponent: GestureComponent {
-    associatedtype State: GestureComponentState
-    var state: State { get set }
-}
-
-extension StatefulGestureComponent {
-    public mutating func reset() {
-        state = State()
-    }
-}
-
-// MARK: - CompositeGestureComponent
-
-/// A gesture component that wraps an upstream component, enabling chaining.
-public protocol CompositeGestureComponent: GestureComponent {
-    associatedtype Upstream: GestureComponent
-    var upstream: Upstream { get set }
-}
-
-extension CompositeGestureComponent {
-    /// Default: delegates to upstream.update(context:)
-    public func update(context: GestureComponentContext) throws -> GestureOutput<Value> {
-        fatalError("CompositeGestureComponent subtype must override update(context:)")
-    }
-
-    public mutating func reset() {
-        upstream.reset()
-    }
-
-    public func traits() -> GestureTraitCollection? {
-        upstream.traits()
+    package mutating func tracingUpdate(context: GestureComponentContext) throws -> GestureOutput<Value> {
+        try update(context: context)
     }
 }
 
 // MARK: - GestureComponentContext
 
 /// Context passed to gesture components during update cycles.
-public struct GestureComponentContext: Sendable {
+public struct GestureComponentContext: @unchecked Sendable {
     public var startTime: Timestamp
     public var currentTime: Timestamp
+    package var updateSource: GestureUpdateSource
+    package var updateTracer: UpdateTracer?
+    package var eventStore: AnyEventStore
 
     public var durationSinceStart: Duration {
         startTime.duration(to: currentTime)
     }
-
-    public init(startTime: Timestamp, currentTime: Timestamp) {
-        self.startTime = startTime
-        self.currentTime = currentTime
-    }
 }
 
-// MARK: - GestureComponentState
+// MARK: - GestureUpdateSource
 
-public protocol GestureComponentState: Sendable {
-    init()
+/// Source that caused a gesture component update cycle.
+package enum GestureUpdateSource: Equatable, Sendable {
+    /// Scheduler-driven update carrying the scheduled request identifiers.
+    case scheduler(Set<UInt32>)
+
+    /// Event-driven update.
+    case event
 }
