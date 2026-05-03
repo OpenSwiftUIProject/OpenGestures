@@ -19,6 +19,13 @@ extension StatefulGestureComponent {
     }
 }
 
+extension CompositeGestureComponent where Self: StatefulGestureComponent {
+    public mutating func reset() {
+        upstream.reset()
+        state = State()
+    }
+}
+
 // MARK: - GestureComponentState
 
 public protocol GestureComponentState: Sendable {
