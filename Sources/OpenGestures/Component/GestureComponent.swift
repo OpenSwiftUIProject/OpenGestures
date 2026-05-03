@@ -20,7 +20,41 @@ public protocol GestureComponent: Sendable {
 
 extension GestureComponent {
     package mutating func tracingUpdate(context: GestureComponentContext) throws -> GestureOutput<Value> {
-        try update(context: context)
+        guard let updateTracer = context.updateTracer else {
+            return try update(context: context)
+        }
+
+        updateTracer.beginTrace()
+        let result: Result<GestureOutput<Value>, any Error> = Result {
+            try update(context: context)
+        }
+        let snapshot = makeTraceDataSnapshot(result: result)
+        updateTracer.endTrace(snapshot: snapshot)
+        return try result.get()
+    }
+
+    private mutating func makeTraceDataSnapshot(
+        result: Result<GestureOutput<Value>, any Error>
+    ) -> TraceDataSnapshot {
+        let componentDescription = String(describing: self)
+        let resultDescription = String(describing: result)
+        let stateDescription: String
+        if let stateful = self as? any StatefulGestureComponent {
+            stateDescription = String(describing: stateful.state)
+        } else {
+            stateDescription = ""
+        }
+        return TraceDataSnapshot(
+            component: { componentDescription },
+            result: { resultDescription },
+            state: { stateDescription },
+            isSuccess: {
+                switch result {
+                case .success: true
+                case .failure: false
+                }
+            }()
+        )
     }
 }
 
@@ -36,6 +70,20 @@ public struct GestureComponentContext: @unchecked Sendable {
 
     public var durationSinceStart: Duration {
         startTime.duration(to: currentTime)
+    }
+
+    package init(
+        startTime: Timestamp,
+        currentTime: Timestamp,
+        updateSource: GestureUpdateSource,
+        updateTracer: UpdateTracer? = nil,
+        eventStore: AnyEventStore
+    ) {
+        self.startTime = startTime
+        self.currentTime = currentTime
+        self.updateSource = updateSource
+        self.updateTracer = updateTracer
+        self.eventStore = eventStore
     }
 }
 

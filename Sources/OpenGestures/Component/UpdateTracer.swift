@@ -27,6 +27,27 @@ package class UpdateTracer: @unchecked Sendable {
         self.pendingBranches = pendingBranches
         self.dataSnapshots = dataSnapshots
     }
+
+    package func beginTrace() {
+        seed = seed &+ 1
+        if let traceHead, let activeTrace = activeTraces.last {
+            pendingBranches[activeTrace.id, default: []].append(traceHead)
+            self.traceHead = nil
+        }
+        activeTraces.append(Trace(id: seed))
+    }
+
+    package func endTrace(snapshot: TraceDataSnapshot) {
+        var trace = activeTraces.popLast()!
+        dataSnapshots[trace.id] = snapshot
+        if let traceHead {
+            trace.upstreamTraces.append(traceHead)
+        }
+        if let pending = pendingBranches.removeValue(forKey: trace.id) {
+            trace.upstreamTraces.append(contentsOf: pending)
+        }
+        traceHead = trace
+    }
 }
 
 // MARK: - TraceDataSnapshot
@@ -52,7 +73,7 @@ package struct TraceDataSnapshot: Sendable {
 
 // MARK: - Trace
 
-package struct Trace: Identifiable, Sendable {
+package struct Trace: Hashable, Identifiable, Sendable {
     package var id: Int16
     package var upstreamTraces: [Trace]
 
