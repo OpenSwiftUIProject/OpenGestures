@@ -58,6 +58,14 @@ extension GestureComponent {
     }
 }
 
+extension CompositeGestureComponent {
+    public mutating func update(
+        context: GestureComponentContext
+    ) throws -> GestureOutput<Upstream.Value> {
+        try upstream.tracingUpdate(context: context)
+    }
+}
+
 // MARK: - GestureComponentContext
 
 /// Context passed to gesture components during update cycles.
