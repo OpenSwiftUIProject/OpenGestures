@@ -19,6 +19,14 @@ public protocol GestureComponent: Sendable {
 // MARK: - GestureComponent + Tracing
 
 extension GestureComponent {
+    package mutating func tracingUpdateResult(
+        context: GestureComponentContext
+    ) -> Result<GestureOutput<Value>, any Error> {
+        Result {
+            try tracingUpdate(context: context)
+        }
+    }
+
     package mutating func tracingUpdate(context: GestureComponentContext) throws -> GestureOutput<Value> {
         guard let updateTracer = context.updateTracer else {
             return try update(context: context)

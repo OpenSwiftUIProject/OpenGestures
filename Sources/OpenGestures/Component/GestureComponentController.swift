@@ -3,30 +3,44 @@
 //  OpenGestures
 //
 //  Audited for 9126.1.5
-//  Status: WIP
+//  Status: Complete
 
-// MARK: - GestureComponentController [WIP]
+import Dispatch
 
-/// Concrete controller wrapping a specific `GestureComponent`.
-public final class GestureComponentController<C: GestureComponent>: AnyGestureComponentController, @unchecked Sendable {
+// MARK: - GestureComponentController
 
-    public var component: C
-    let timeScheduler: any TimeScheduler
-    // TODO: var eventStores: [ObjectIdentifier: AnyEventStore] = [:]
-    var _traits: GestureTraitCollection?
-    var startTime: Timestamp?
-    var updateListener: ((Result<GestureOutput<C.Value>, any Error>) -> Void)?
-    // TODO: lazy var updateTracer: UpdateTracer?
-    lazy var updateScheduler: UpdateScheduler? = nil
+public final class GestureComponentController<Component: GestureComponent>: AnyGestureComponentController, @unchecked Sendable {
 
-    public init(component: C, timeScheduler: any TimeScheduler) {
+    private var component: Component
+    private let timeScheduler: any TimeScheduler
+    private var eventStores: [ObjectIdentifier: AnyEventStore] = [:]
+    private var _traits: GestureTraitCollection?
+    private var startTime: Timestamp?
+    private var updateListener: ((Result<GestureOutput<Component.Value>, any Error>) -> Void)?
+    private lazy var updateTracer: UpdateTracer? = UpdateTracer()
+    private lazy var updateScheduler = UpdateScheduler(
+        timeScheduler: timeScheduler,
+        scheduledRequests: [:]
+    )
+
+    public init(component: Component, timeScheduler: any TimeScheduler) {
         self.component = component
         self.timeScheduler = timeScheduler
         super.init()
     }
 
+    public convenience init(component: Component) {
+        self.init(
+            component: component,
+            timeScheduler: DispatchTimeScheduler(queue: .main, timeSource: UptimeTimeSource())
+        )
+    }
+
     public override var traits: GestureTraitCollection? {
-        component.traits()
+        if _traits == nil {
+            _traits = component.traits()
+        }
+        return _traits
     }
 
     public override var timeSource: any TimeSource {
@@ -38,66 +52,129 @@ public final class GestureComponentController<C: GestureComponent>: AnyGestureCo
     }
 
     public override func handleEvents<E: Event>(_ events: [E]) throws {
-        let currentTime = timeScheduler.timestamp
-        let startTime = self.startTime ?? currentTime
-        if self.startTime == nil {
-            self.startTime = currentTime
+        let store = eventStore(for: E.self)
+        store.append(events)
+        if startTime == nil {
+            startTime = timeScheduler.timestamp
         }
-
-        let context = GestureComponentContext(startTime: startTime, currentTime: currentTime)
-        let output = try component.update(context: context)
-
-        guard let node else { return }
-        switch output {
-        case .empty:
-            break
-        case .value(let value, _):
-            try node.update(someValue: value, isFinalUpdate: false)
-        case .finalValue(let value, _):
-            try node.update(someValue: value, isFinalUpdate: true)
-        }
+        try performUpdate(updateSource: .event, eventType: E.self)
+        store.removeUnboundTerminalEvents()
     }
 
     public override func reset() {
+        updateScheduler.cancelAll()
+        for store in eventStores.values {
+            store.unbindAll()
+        }
         component.reset()
+        _traits = nil
         startTime = nil
+    }
+
+    private func eventStore<E: Event>(for eventType: E.Type) -> AnyEventStore {
+        let key = ObjectIdentifier(eventType)
+        if let store = eventStores[key] {
+            return store
+        }
+        let store = EventStore<E>()
+        eventStores[key] = store
+        return store
+    }
+
+    private func performUpdate<E: Event>(
+        updateSource: GestureUpdateSource,
+        eventType: E.Type
+    ) throws {
+        let context = GestureComponentContext(
+            startTime: startTime!,
+            currentTime: timeScheduler.timestamp,
+            updateSource: updateSource,
+            updateTracer: updateTracer,
+            eventStore: eventStore(for: eventType)
+        )
+        let result = component.tracingUpdateResult(context: context)
+        if let updateTracer {
+            updateTracer.logTrace()
+            updateTracer.reset()
+        }
+        if let output = try? result.get() {
+            try processMetadata(output, eventType: eventType)
+        }
+        if let node {
+            try dispatch(node, result: result)
+        }
+        updateListener?(result)
+    }
+
+    private func processMetadata<E: Event>(
+        _ output: GestureOutput<Component.Value>,
+        eventType: E.Type
+    ) throws {
+        guard let metadata = output.metadata else {
+            return
+        }
+        if !metadata.updatesToSchedule.isEmpty {
+            updateScheduler.schedule(metadata.updatesToSchedule) { [weak self] requestIDs in
+                guard let self else {
+                    return
+                }
+                do {
+                    try self.performUpdate(
+                        updateSource: .scheduler(requestIDs),
+                        eventType: eventType
+                    )
+                } catch {
+                    // Scheduled update failures are consumed because scheduler
+                    // callbacks cannot throw.
+                }
+            }
+        }
+        if !metadata.updatesToCancel.isEmpty {
+            updateScheduler.cancel(metadata.updatesToCancel)
+        }
+    }
+
+    private func dispatch(
+        _ node: AnyGestureNode,
+        result: Result<GestureOutput<Component.Value>, any Error>
+    ) throws {
+        switch result {
+        case let .success(output):
+            if let value = output.value {
+                try node.update(someValue: value, isFinalUpdate: output.isFinal)
+            }
+        case let .failure(error):
+            try node.update(reason: .custom(error), isFinalUpdate: false)
+        }
     }
 }
 
 // MARK: - AnyGestureComponentController
 
-/// Type-erased base for gesture component controllers.
 open class AnyGestureComponentController: @unchecked Sendable {
 
-    /// Weak back-reference to the owning gesture node.
     open weak var node: AnyGestureNode?
 
-    /// Traits exposed by the wrapped component.
     open var traits: GestureTraitCollection? {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    /// Time source used by `handleEvents` to build `GestureComponentContext`.
     open var timeSource: any TimeSource {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    /// Whether this controller can consume `count` events of the given type.
     open func canHandleEvents<E: Event>(ofType: E.Type, count: Int) -> Bool {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    /// Whether this controller can consume a single event.
     open func canHandleEvent<E: Event>(_ event: E) -> Bool {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    /// Drives the wrapped component with the given events.
     open func handleEvents<E: Event>(_ events: [E]) throws {
         _openGesturesBaseClassAbstractMethod()
     }
 
-    /// Resets the controller and its wrapped component.
     open func reset() {
         _openGesturesBaseClassAbstractMethod()
     }

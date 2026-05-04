@@ -19,6 +19,43 @@ public final class UpdateScheduler {
         self.timeScheduler = timeScheduler
         self.scheduledRequests = scheduledRequests
     }
+
+    // TBA
+    package func schedule(
+        _ requests: [UpdateRequest],
+        handler: @escaping (Set<UInt32>) -> Void
+    ) {
+        for request in requests {
+            if let token = scheduledRequests[request] {
+                timeScheduler.cancel(token: token)
+            }
+            let token = timeScheduler.schedule(
+                after: request.targetTime - timestamp,
+                handler: { handler([request.id]) },
+                cancelHandler: nil
+            )
+            scheduledRequests[request] = token
+        }
+    }
+
+    package func cancel(_ requests: [UpdateRequest]) {
+        for request in requests {
+            guard let token = scheduledRequests.removeValue(forKey: request) else {
+                continue
+            }
+            timeScheduler.cancel(token: token)
+        }
+    }
+
+    package func cancelAll() {
+        let requests = scheduledRequests.keys
+        for request in requests {
+            guard let token = scheduledRequests.removeValue(forKey: request) else {
+                continue
+            }
+            timeScheduler.cancel(token: token)
+        }
+    }
 }
 
 @_spi(Private)

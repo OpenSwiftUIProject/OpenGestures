@@ -114,6 +114,7 @@ package enum Log {
     #if canImport(os)
     package static let nodes = Logger(subsystem: subsystem, category: Category.nodes.rawValue)
     package static let components = Logger(subsystem: subsystem, category: Category.components.rawValue)
+    package static let componentUpdates = Logger(subsystem: subsystem, category: "ComponentUpdates")
     package static let disabled = Logger(OSLog.disabled)
 
     package static func enabledLogger(for category: Category) -> Logger {
@@ -128,10 +129,12 @@ package enum Log {
         }
     }
 
+    @inline(__always)
     package static func logEnqueuedPhase(_ node: AnyGestureNode) {
-        enabledLogger(for: .nodes).log("\(node.debugLabel, privacy: .public) enqueued phase")
+        enabledLogger(for: .nodes).log("\(node.debugLabel) enqueued phase")
     }
     #else
+    @inline(__always)
     package static func logEnqueuedPhase(_ node: AnyGestureNode) {}
     #endif
 }

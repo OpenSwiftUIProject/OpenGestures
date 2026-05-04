@@ -54,8 +54,6 @@ package final class EventStore<E: Event>: AnyEventStore, @unchecked Sendable {
             guard isBound || phase == .began else {
                 continue
             }
-            // The reference binary relies on the caller routing matching event
-            // stores and uses a size-checked cast before appending to [E].
             events.append(unsafeBitCast(event, to: E.self))
         }
     }
