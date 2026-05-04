@@ -12,6 +12,10 @@ import Foundation
 @objc
 class AnyGestureNodeShim: NSObject, @unchecked Sendable {
 
+    package var node: AnyGestureNode {
+        _openGesturesBaseClassAbstractMethod()
+    }
+
 //    override var container: (any GestureNodeContainer)? {
 //        didSet {
 //            // TODO
