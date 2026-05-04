@@ -30,6 +30,10 @@ extension TrackedValue: LocationContaining where Value: LocationContaining {
     package var location: CGPoint {
         current.location
     }
+
+    package var locationTranslation: CGPoint {
+        current.location - initial.location
+    }
 }
 
 // MARK: - TrackedValue + Equatable
