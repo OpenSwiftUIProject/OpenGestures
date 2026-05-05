@@ -20,19 +20,16 @@ public final class UpdateScheduler {
         self.scheduledRequests = scheduledRequests
     }
 
-    // TBA
     package func schedule(
         _ requests: [UpdateRequest],
-        handler: @escaping (Set<UInt32>) -> Void
+        handler: @escaping (Set<UInt32>) -> Void,
+        cancelHandler: (() -> Void)? = nil
     ) {
         for request in requests {
-            if let token = scheduledRequests[request] {
-                timeScheduler.cancel(token: token)
-            }
             let token = timeScheduler.schedule(
-                after: request.targetTime - timestamp,
+                after: request.targetTime - request.creationTime,
                 handler: { handler([request.id]) },
-                cancelHandler: nil
+                cancelHandler: cancelHandler
             )
             scheduledRequests[request] = token
         }
@@ -83,6 +80,14 @@ package struct UpdateRequest: Hashable, Identifiable, CustomStringConvertible {
         self.creationTime = creationTime
         self.targetTime = targetTime
         self.tag = tag
+    }
+
+    package static func == (lhs: UpdateRequest, rhs: UpdateRequest) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    package func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 
     package var description: String {

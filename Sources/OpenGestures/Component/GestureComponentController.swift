@@ -98,7 +98,7 @@ public final class GestureComponentController<Component: GestureComponent>: AnyG
             updateTracer.reset()
         }
         if let output = try? result.get() {
-            try processMetadata(output, eventType: eventType)
+            try applyOutputMetadata(output, eventType: eventType)
         }
         if let node {
             try dispatch(node, result: result)
@@ -106,7 +106,7 @@ public final class GestureComponentController<Component: GestureComponent>: AnyG
         updateListener?(result)
     }
 
-    private func processMetadata<E: Event>(
+    private func applyOutputMetadata<E: Event>(
         _ output: GestureOutput<Component.Value>,
         eventType: E.Type
     ) throws {
@@ -114,12 +114,16 @@ public final class GestureComponentController<Component: GestureComponent>: AnyG
             return
         }
         if !metadata.updatesToSchedule.isEmpty {
-            updateScheduler.schedule(metadata.updatesToSchedule) { [weak self] requestIDs in
-                guard let self else {
-                    return
-                }
-                performScheduledUpdate(requestIDs, eventType: eventType)
-            }
+            updateScheduler.schedule(
+                metadata.updatesToSchedule,
+                handler: { [weak self] requestIDs in
+                    guard let self else {
+                        return
+                    }
+                    performScheduledUpdate(requestIDs, eventType: eventType)
+                },
+                cancelHandler: nil
+            )
         }
         if !metadata.updatesToCancel.isEmpty {
             updateScheduler.cancel(metadata.updatesToCancel)
