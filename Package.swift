@@ -138,6 +138,7 @@ let compatibilityTestCondition = envBoolValue("COMPATIBILITY_TEST", default: fal
 
 let gesturesCondition = envBoolValue("OPENGESTURESSHIMS_GESTURES", default: false)
 let useLocalDeps = envBoolValue("USE_LOCAL_DEPS", default: false)
+let swiftLogCondition = envBoolValue("SWIFT_LOG", default: !buildForDarwinPlatform)
 
 let swiftCorelibsPath = envStringValue("LIB_SWIFT_PATH") ?? "\(Context.packageDirectory)/Sources/SwiftCorelibs/include"
 
@@ -189,6 +190,13 @@ extension Target {
         dependencies.append(.product(name: "Gestures", package: "DarwinPrivateFrameworks"))
         var swiftSettings = swiftSettings ?? []
         swiftSettings.append(.define("OPENGESTURES_GESTURES"))
+        self.swiftSettings = swiftSettings
+    }
+
+    func addSwiftLogSettings() {
+        dependencies.append(.product(name: "Logging", package: "swift-log"))
+        var swiftSettings = swiftSettings ?? []
+        swiftSettings.append(.define("OPENGESTURES_SWIFT_LOG"))
         self.swiftSettings = swiftSettings
     }
 }
@@ -250,6 +258,13 @@ let package = Package(
         openGesturesShimsTarget,
     ]
 )
+
+if swiftLogCondition {
+    package.dependencies.append(
+        .package(url: "https://github.com/apple/swift-log", from: "1.5.3")
+    )
+    openGesturesTarget.addSwiftLogSettings()
+}
 
 private var hasSetupDPFDependency = false
 

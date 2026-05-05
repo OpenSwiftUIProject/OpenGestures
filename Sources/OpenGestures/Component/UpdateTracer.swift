@@ -95,12 +95,7 @@ package class UpdateTracer: @unchecked Sendable {
             return
         }
         let renderedTrace = traceHead.rendered(using: dataSnapshots)
-        #if canImport(os)
         Log.componentUpdates.log("\(renderedTrace)")
-        #else
-        // TODO: Add swift-log library support
-        print(renderedTrace)
-        #endif
     }
 
     /// Clears all recorded trace state.
