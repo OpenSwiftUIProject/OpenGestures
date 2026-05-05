@@ -118,19 +118,25 @@ public final class GestureComponentController<Component: GestureComponent>: AnyG
                 guard let self else {
                     return
                 }
-                do {
-                    try self.performUpdate(
-                        updateSource: .scheduler(requestIDs),
-                        eventType: eventType
-                    )
-                } catch {
-                    // Scheduled update failures are consumed because scheduler
-                    // callbacks cannot throw.
-                }
+                performScheduledUpdate(requestIDs, eventType: eventType)
             }
         }
         if !metadata.updatesToCancel.isEmpty {
             updateScheduler.cancel(metadata.updatesToCancel)
+        }
+    }
+
+    private func performScheduledUpdate<E: Event>(
+        _ requestIDs: Set<UInt32>,
+        eventType: E.Type
+    ) {
+        do {
+            try performUpdate(
+                updateSource: .scheduler(requestIDs),
+                eventType: eventType
+            )
+        } catch {
+            Log.logFailedScheduledUpdate()
         }
     }
 

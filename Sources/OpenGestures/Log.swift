@@ -133,8 +133,16 @@ package enum Log {
     package static func logEnqueuedPhase(_ node: AnyGestureNode) {
         enabledLogger(for: .nodes).log("\(node.debugLabel) enqueued phase")
     }
+
+    @inline(__always)
+    package static func logFailedScheduledUpdate() {
+        enabledLogger(for: .components).log("Failed to peform a scheduled update")
+    }
     #else
     @inline(__always)
     package static func logEnqueuedPhase(_ node: AnyGestureNode) {}
+
+    @inline(__always)
+    package static func logFailedScheduledUpdate() {}
     #endif
 }
