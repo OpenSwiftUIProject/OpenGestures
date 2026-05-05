@@ -176,23 +176,23 @@ package enum ExpirablePayload<Value: Sendable>: NestedCustomStringConvertible, S
     }
 }
 
-// MARK: - GestureOutput + ExpirationRecord  [TBA]
+// MARK: - GestureOutput + ExpirationRecord
 
 extension GestureOutput {
-    package func mapToExpirationRecord(
-        expiration: Expiration?
+    package func expired(
+        with expiration: Expiration?
     ) -> GestureOutput<ExpirationRecord<Value>> {
         switch self {
         case let .empty(reason, metadata):
-            .value(
-                ExpirationRecord(
+            return .value(
+                ExpirationRecord<Value>(
                     payload: .empty(reason),
                     expiration: expiration
                 ),
                 metadata: metadata
             )
         case let .value(value, metadata):
-            .value(
+            return .value(
                 ExpirationRecord(
                     payload: .value(value),
                     expiration: expiration
@@ -200,7 +200,7 @@ extension GestureOutput {
                 metadata: metadata
             )
         case let .finalValue(value, metadata):
-            .finalValue(
+            return .finalValue(
                 ExpirationRecord(
                     payload: .value(value),
                     expiration: expiration
