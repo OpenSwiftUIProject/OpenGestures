@@ -9,7 +9,46 @@ import Darwin
 #elseif canImport(Glibc)
 import Glibc
 #endif
-#if canImport(os)
+
+#if OPENGESTURES_SWIFT_LOG
+package import Logging
+
+extension Logger {
+    package init(subsystem: String, category: String) {
+        var logger = Logger(label: subsystem)
+        logger[metadataKey: "category"] = .string(category)
+        self = logger
+    }
+}
+
+extension Logger.Level {
+    #if DEBUG
+    package static let `default`: Logger.Level = .debug
+    #else
+    package static let `default`: Logger.Level = .info
+    #endif
+}
+
+extension Logger {
+    package func log(
+        _ message: @autoclosure () -> Logger.Message,
+        metadata: @autoclosure () -> Logger.Metadata? = nil,
+        file: String = #fileID,
+        function: String = #function,
+        line: UInt = #line
+    ) {
+        log(
+            level: .default,
+            message(),
+            metadata: metadata(),
+            source: nil,
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+}
+#else
 package import os
 #endif
 
@@ -109,7 +148,6 @@ package enum Log {
         #endif
     }
 
-    #if canImport(os)
     private static let _nodes = Logger(subsystem: subsystem, category: "Nodes")
 
     package static var nodes: Logger {
@@ -124,7 +162,13 @@ package enum Log {
 
     package static let componentUpdates = Logger(subsystem: subsystem, category: "ComponentUpdates")
 
+    #if OPENGESTURES_SWIFT_LOG
+    private static let disabled = Logger(label: subsystem) { _ in
+        SwiftLogNoOpLogHandler()
+    }
+    #else
     private static let disabled = Logger(OSLog.disabled)
+    #endif
 
     @inline(__always)
     package static func logEnqueuedPhase(_ node: AnyGestureNode) {
@@ -135,12 +179,4 @@ package enum Log {
     package static func logFailedScheduledUpdate() {
         components.log("Failed to peform a scheduled update")
     }
-    #else
-    // TODO: Add swift-log support
-    @inline(__always)
-    package static func logEnqueuedPhase(_ node: AnyGestureNode) {}
-
-    @inline(__always)
-    package static func logFailedScheduledUpdate() {}
-    #endif
 }
