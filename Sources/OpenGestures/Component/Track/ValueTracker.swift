@@ -49,7 +49,8 @@ extension ValueTracker: StatefulGestureComponent {}
 extension ValueTracker: ValueTransformingComponent {
     package mutating func transform(
         _ value: Upstream.Value,
-        isFinal: Bool
+        isFinal: Bool,
+        context: GestureComponentContext
     ) throws -> GestureOutput<Value> {
         let current = valueReader(value)
         if state.initialValue == nil {

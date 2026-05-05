@@ -10,7 +10,8 @@
 package protocol ValueTransformingComponent: CompositeGestureComponent {
     mutating func transform(
         _ value: Upstream.Value,
-        isFinal: Bool
+        isFinal: Bool,
+        context: GestureComponentContext
     ) throws -> GestureOutput<Value>
 }
 
@@ -23,9 +24,9 @@ extension ValueTransformingComponent {
         case let .empty(reason, metadata):
             return .empty(reason, metadata: metadata)
         case let .value(value, _):
-            return try transform(value, isFinal: false)
+            return try transform(value, isFinal: false, context: context)
         case let .finalValue(value, _):
-            return try transform(value, isFinal: true)
+            return try transform(value, isFinal: true, context: context)
         }
     }
 }
@@ -33,7 +34,8 @@ extension ValueTransformingComponent {
 extension ValueTransformingComponent where Value == Upstream.Value {
     package mutating func transform(
         _ value: Upstream.Value,
-        isFinal: Bool
+        isFinal: Bool,
+        context: GestureComponentContext
     ) throws -> GestureOutput<Value> {
         if isFinal {
             return .finalValue(value, metadata: nil)

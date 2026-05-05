@@ -51,7 +51,8 @@ extension MovementGate: CompositeGestureComponent {}
 extension MovementGate: ValueTransformingComponent {
     package mutating func transform(
         _ value: Upstream.Value,
-        isFinal: Bool
+        isFinal: Bool,
+        context: GestureComponentContext
     ) throws -> GestureOutput<Value> {
         let movement = value.locationTranslation.magnitude
         switch restriction {
