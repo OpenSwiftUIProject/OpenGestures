@@ -31,18 +31,16 @@ private func logPreferencesChangedCallback(
 // MARK: - Log
 
 package enum Log {
-    private static let unknownDefaultsCacheState: UInt = 0
-    private static let enabledDefaultsCacheState: UInt = 1
-    private static let disabledDefaultsCacheState: UInt = 2
-    private static let defaultsCacheState = Atomic(unknownDefaultsCacheState)
+    private enum DefaultsCacheState: UInt {
+        case unknown = 0
+        case enabled = 1
+        case disabled = 2
+    }
+
+    private static let defaultsCacheState = Atomic(DefaultsCacheState.unknown.rawValue)
     private static let observerRegistered = Atomic<UInt8>(0)
 
     package static let subsystem = "org.OpenSwiftUIProject.OpenGestures"
-
-    package enum Category: String {
-        case nodes = "Nodes"
-        case components = "Components"
-    }
 
     package static let hasInternalContent: Bool = {
         subsystem.withCString { ogf_variant_has_internal_diagnostics($0) }
@@ -62,14 +60,14 @@ package enum Log {
         if isEnvironmentLoggingEnabled {
             return true
         }
-        switch defaultsCacheState.load(ordering: .acquiring) {
-        case unknownDefaultsCacheState:
+        switch DefaultsCacheState(rawValue: defaultsCacheState.load(ordering: .acquiring)) {
+        case .unknown:
             break
-        case enabledDefaultsCacheState:
+        case .enabled:
             return true
-        case disabledDefaultsCacheState:
+        case .disabled:
             return false
-        default:
+        case nil:
             preconditionFailure("Invalid logging defaults cache state")
         }
         guard let defaults = UserDefaults(suiteName: subsystem) else {
@@ -77,7 +75,7 @@ package enum Log {
         }
         let isEnabled = defaults.bool(forKey: "LoggingEnabled")
         defaultsCacheState.store(
-            isEnabled ? enabledDefaultsCacheState : disabledDefaultsCacheState,
+            (isEnabled ? DefaultsCacheState.enabled : DefaultsCacheState.disabled).rawValue,
             ordering: .releasing
         )
         registerLoggingPreferencesObserver()
@@ -85,7 +83,7 @@ package enum Log {
     }
 
     fileprivate static func invalidateLoggingPreferencesCache() {
-        defaultsCacheState.store(unknownDefaultsCacheState, ordering: .releasing)
+        defaultsCacheState.store(DefaultsCacheState.unknown.rawValue, ordering: .releasing)
     }
 
     private static func registerLoggingPreferencesObserver() {
@@ -112,26 +110,37 @@ package enum Log {
     }
 
     #if canImport(os)
-    package static let nodes = Logger(subsystem: subsystem, category: Category.nodes.rawValue)
-    package static let components = Logger(subsystem: subsystem, category: Category.components.rawValue)
-    package static let disabled = Logger(OSLog.disabled)
+    private static let _nodes = Logger(subsystem: subsystem, category: "Nodes")
 
-    package static func enabledLogger(for category: Category) -> Logger {
-        guard isGesturesLoggingEnabled else {
-            return disabled
-        }
-        switch category {
-        case .nodes:
-            return nodes
-        case .components:
-            return components
-        }
+    package static var nodes: Logger {
+        isGesturesLoggingEnabled ? _nodes : disabled
     }
 
+    private static let _components = Logger(subsystem: subsystem, category: "Components")
+
+    package static var components: Logger {
+        isGesturesLoggingEnabled ? _components : disabled
+    }
+
+    package static let componentUpdates = Logger(subsystem: subsystem, category: "ComponentUpdates")
+
+    private static let disabled = Logger(OSLog.disabled)
+
+    @inline(__always)
     package static func logEnqueuedPhase(_ node: AnyGestureNode) {
-        enabledLogger(for: .nodes).log("\(node.debugLabel, privacy: .public) enqueued phase")
+        nodes.log("\(node.debugLabel) enqueued phase")
+    }
+
+    @inline(__always)
+    package static func logFailedScheduledUpdate() {
+        components.log("Failed to peform a scheduled update")
     }
     #else
+    // TODO: Add swift-log support
+    @inline(__always)
     package static func logEnqueuedPhase(_ node: AnyGestureNode) {}
+
+    @inline(__always)
+    package static func logFailedScheduledUpdate() {}
     #endif
 }

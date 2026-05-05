@@ -26,16 +26,6 @@ public func ogfGestureNodeCoordinatorCreate(
     // TODO: Create GestureNodeCoordinatorShim
     preconditionFailure("")
 }
-
-@_cdecl("OGFGestureComponentControllerSetNode")
-public func ogfGestureComponentControllerSetNode(
-    _ controller: AnyObject,
-    _ node: (any OGFGestureNode)?
-) {
-    guard let _ = controller as? AnyGestureComponentController else { return }
-    preconditionFailure("")
-}
-
 #else
 
 public func OGFGestureNodeDefaultValue() -> Any {
@@ -52,23 +42,32 @@ public func OGFGestureNodeCoordinatorCreate(
 ) -> any OGFGestureNodeCoordinator {
     _openGesturesPlatformUnimplementedFailure()
 }
+#endif
 
-public func OGFGestureComponentControllerSetNode(
+#if canImport(ObjectiveC)
+@_cdecl("OGFGestureComponentControllerSetNode")
+#endif
+public func ogfGestureComponentControllerSetNode(
     _ controller: AnyObject,
     _ node: (any OGFGestureNode)?
 ) {
-    _openGesturesPlatformUnimplementedFailure()
+    let controller = unsafeBitCast(controller, to: AnyGestureComponentController.self)
+    let newNode: AnyGestureNode?
+    if let node {
+        newNode = unsafeBitCast(node, to: AnyGestureNodeShim.self).node
+    } else {
+        newNode = nil
+    }
+    let previousNode = controller.node
+    controller.node = newNode
+    if controller.node == nil, previousNode != nil {
+        controller.reset()
+    }
 }
-
-public func OGFGestureFailureTypeIsTerminated(_ type: OGFGestureFailureType) -> Bool {
-    ogfGestureFailureTypeIsTerminated(type: type)
-}
-
-#endif
 
 @_cdecl("OGFGestureFailureTypeIsTerminated")
 public func ogfGestureFailureTypeIsTerminated(
-    type: OGFGestureFailureType
+    _ type: OGFGestureFailureType
 ) -> Bool {
     switch type {
     case .customError, .disabled, .activationDenied, .aborted:

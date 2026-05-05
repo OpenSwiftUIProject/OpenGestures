@@ -35,6 +35,17 @@ extension GestureOutput {
         default: false
         }
     }
+
+    package var metadata: GestureOutputMetadata? {
+        switch self {
+        case let .empty(_, metadata):
+            metadata
+        case let .value(_, metadata):
+            metadata
+        case let .finalValue(_, metadata):
+            metadata
+        }
+    }
 }
 
 // MARK: - GestureOutput + NestedCustomStringConvertible
