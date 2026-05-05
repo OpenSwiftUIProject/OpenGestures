@@ -3,7 +3,7 @@
 //  OpenGestures
 //
 //  Audited for 9126.1.5
-//  Status: WIP
+//  Status: Complete
 
 import Synchronization
 
@@ -23,7 +23,7 @@ package struct ExpirationComponent<Upstream>: Sendable where Upstream: GestureCo
 
     package var upstream: Upstream
 
-    package struct State: NestedCustomStringConvertible, Sendable {
+    package struct State: GestureComponentState, NestedCustomStringConvertible, Sendable {
         package var request: UpdateRequest?
 
         package init() {
@@ -50,19 +50,15 @@ package struct ExpirationComponent<Upstream>: Sendable where Upstream: GestureCo
     }
 }
 
-// MARK: - ExpirationComponent + CompositeGestureComponent
+// MARK: - ExpirationComponent + GestureComponent
+
+extension ExpirationComponent: GestureComponent {
+    package typealias Value = Upstream.Value.Value
+}
 
 extension ExpirationComponent: CompositeGestureComponent {}
 
-// MARK: - ExpirationComponent + StatefulGestureComponent
-
 extension ExpirationComponent: StatefulGestureComponent {}
-
-// MARK: - ExpirationComponent.State + GestureComponentState
-
-extension ExpirationComponent.State: GestureComponentState {}
-
-// MARK: - ExpirationComponent + ValueTransformingComponent
 
 extension ExpirationComponent: ValueTransformingComponent {
     package mutating func transform(
@@ -74,7 +70,6 @@ extension ExpirationComponent: ValueTransformingComponent {
             for: value.expiration,
             context: context
         )
-
         switch value.payload {
         case let .empty(reason):
             return .empty(reason, metadata: metadata)
@@ -90,49 +85,64 @@ extension ExpirationComponent: ValueTransformingComponent {
     private mutating func metadata(
         for expiration: Expiration?,
         context: GestureComponentContext
-    ) throws -> GestureOutputMetadata? {
-        var updatesToSchedule: [UpdateRequest] = []
-        var updatesToCancel: [UpdateRequest] = []
-
+    ) throws -> GestureOutputMetadata {
+        let updatesToSchedule: [UpdateRequest]
+        let updatesToCancel: [UpdateRequest]
         if let expiration {
             guard context.currentTime < expiration.deadline else {
                 throw Failure.timeout(reason: expiration.reason)
             }
 
-            if let request = state.request {
-                guard request.targetTime != expiration.deadline else {
-                    return nil
-                }
-                updatesToCancel.append(request)
+            if state.request?.targetTime == expiration.deadline {
+                updatesToSchedule = []
+                updatesToCancel = []
+            } else {
+                updatesToCancel = cancelStoredRequest()
+                updatesToSchedule = [scheduleRequest(for: expiration, context: context)]
             }
-
-            let request = UpdateRequest(
-                id: ExpirationComponentRequestID.next(),
-                creationTime: context.currentTime,
-                targetTime: expiration.deadline,
-                tag: expiration.reason.rawValue
-            )
-            state.request = request
-            updatesToSchedule.append(request)
-        } else if let request = state.request {
-            state.request = nil
-            updatesToCancel.append(request)
-        }
-
-        guard !updatesToSchedule.isEmpty || !updatesToCancel.isEmpty else {
-            return nil
+        } else {
+            updatesToSchedule = []
+            updatesToCancel = cancelStoredRequest()
         }
         return GestureOutputMetadata(
             updatesToSchedule: updatesToSchedule,
             updatesToCancel: updatesToCancel
         )
     }
+
+    private mutating func cancelStoredRequest() -> [UpdateRequest] {
+        guard let request = state.request else {
+            return []
+        }
+        state.request = nil
+        return [request]
+    }
+
+    private mutating func scheduleRequest(
+        for expiration: Expiration,
+        context: GestureComponentContext
+    ) -> UpdateRequest {
+        let request = UpdateRequest(
+            id: ExpirationComponentRequestID.next(),
+            creationTime: context.currentTime,
+            targetTime: expiration.deadline,
+            tag: expiration.reason.rawValue
+        )
+        state.request = request
+        return request
+    }
 }
 
-// MARK: - ExpirationComponent + GestureComponent
+// MARK: - ExpirationComponentRequestID
 
-extension ExpirationComponent: GestureComponent {
-    package typealias Value = Upstream.Value.Value
+// FIXE: Should it in UpdateRequest namespace?
+private enum ExpirationComponentRequestID {
+    private static let nextID = Atomic(UInt32.zero)
+
+    static func next() -> UInt32 {
+        let (_, id) = nextID.add(1, ordering: .relaxed)
+        return id
+    }
 }
 
 // MARK: - ExpirationRecord
@@ -198,16 +208,5 @@ extension GestureOutput {
                 metadata: metadata
             )
         }
-    }
-}
-
-// MARK: - ExpirationComponentRequestID [TBA]
-
-private enum ExpirationComponentRequestID {
-    private static let nextID = Atomic(UInt32.zero)
-
-    static func next() -> UInt32 {
-        let (_, id) = nextID.add(1, ordering: .relaxed)
-        return id
     }
 }
