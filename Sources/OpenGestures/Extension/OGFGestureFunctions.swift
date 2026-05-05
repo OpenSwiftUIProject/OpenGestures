@@ -44,16 +44,17 @@ public func OGFGestureNodeCoordinatorCreate(
 }
 #endif
 
+#if canImport(ObjectiveC)
 @_cdecl("OGFGestureComponentControllerSetNode")
+#endif
 public func ogfGestureComponentControllerSetNode(
     _ controller: AnyObject,
     _ node: (any OGFGestureNode)?
 ) {
     let controller = unsafeBitCast(controller, to: AnyGestureComponentController.self)
-    let shim = unsafeBitCast(node, to: AnyGestureNodeShim.self)
     let newNode: AnyGestureNode?
     if let node {
-        newNode = shim.node
+        newNode = unsafeBitCast(node, to: AnyGestureNodeShim.self).node
     } else {
         newNode = nil
     }

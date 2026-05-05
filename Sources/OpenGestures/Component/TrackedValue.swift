@@ -5,6 +5,10 @@
 //  Audited for 9126.1.5
 //  Status: Complete
 
+#if !canImport(Darwin)
+package import OpenCoreGraphicsShims
+#endif
+
 // MARK: - TrackedValue
 
 @frozen

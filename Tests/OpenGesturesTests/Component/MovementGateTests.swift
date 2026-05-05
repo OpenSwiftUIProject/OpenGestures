@@ -4,6 +4,7 @@
 //
 //  Generated
 
+import OpenCoreGraphicsShims
 import OpenGestures
 import Testing
 
