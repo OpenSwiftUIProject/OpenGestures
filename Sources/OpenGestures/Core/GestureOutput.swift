@@ -29,6 +29,13 @@ extension GestureOutput {
         }
     }
 
+    package var emptyReason: GestureOutputEmptyReason? {
+        if case let .empty(reason, _) = self {
+            return reason
+        }
+        return nil
+    }
+
     public var isFinal: Bool {
         switch self {
         case .finalValue: true
@@ -52,17 +59,13 @@ extension GestureOutput {
 
 extension GestureOutput: NestedCustomStringConvertible {
     package func populateNestedDescription(_ nested: inout NestedDescription) {
-        let metadata: GestureOutputMetadata?
         switch self {
-        case let .empty(reason, m):
-            nested.append(reason, label: "emptyReason")
-            metadata = m
-        case let .value(v, m):
-            nested.append(v, label: "value")
-            metadata = m
-        case let .finalValue(v, m):
-            nested.append(v, label: "finalValue")
-            metadata = m
+        case .empty:
+            nested.append(emptyReason, label: "emptyReason")
+        case .value:
+            nested.append(value, label: "value")
+        case .finalValue:
+            nested.append(value, label: "finalValue")
         }
         if let metadata {
             nested.append(metadata, label: "metadata")
