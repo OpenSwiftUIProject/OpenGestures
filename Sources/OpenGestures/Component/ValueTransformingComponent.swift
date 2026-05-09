@@ -23,10 +23,14 @@ extension ValueTransformingComponent {
         switch output {
         case let .empty(reason, metadata):
             return .empty(reason, metadata: metadata)
-        case let .value(value, _):
-            return try transform(value, isFinal: false, context: context)
-        case let .finalValue(value, _):
-            return try transform(value, isFinal: true, context: context)
+        case let .value(value, metadata):
+            var output = try transform(value, isFinal: false, context: context)
+            output.metadata = metadata
+            return output
+        case let .finalValue(value, metadata):
+            var output = try transform(value, isFinal: false, context: context)
+            output.metadata = metadata
+            return output
         }
     }
 }

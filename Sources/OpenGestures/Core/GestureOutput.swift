@@ -44,13 +44,25 @@ extension GestureOutput {
     }
 
     package var metadata: GestureOutputMetadata? {
-        switch self {
-        case let .empty(_, metadata):
-            metadata
-        case let .value(_, metadata):
-            metadata
-        case let .finalValue(_, metadata):
-            metadata
+        get {
+            switch self {
+            case let .empty(_, metadata):
+                metadata
+            case let .value(_, metadata):
+                metadata
+            case let .finalValue(_, metadata):
+                metadata
+            }
+        }
+        set {
+            switch self {
+            case let .empty(reason, _):
+                self = .empty(reason, metadata: .combineUpdateRequests(metadata, newValue))
+            case let .value(value, _):
+                self = .value(value, metadata: .combineUpdateRequests(metadata, newValue))
+            case let .finalValue(value, _):
+                self = .finalValue(value, metadata: .combineUpdateRequests(metadata, newValue))
+            }
         }
     }
 
@@ -108,6 +120,31 @@ public struct GestureOutputMetadata: Sendable {
         self.updatesToSchedule = updatesToSchedule
         self.updatesToCancel = updatesToCancel
         self.traceAnnotation = traceAnnotation
+    }
+
+    package static func combineUpdateRequests(
+        _ first: GestureOutputMetadata?,
+        _ second: GestureOutputMetadata?
+    ) -> GestureOutputMetadata? {
+        switch (first, second) {
+        case (nil, nil):
+            return nil
+        case let (metadata?, nil):
+            return GestureOutputMetadata(
+                updatesToSchedule: metadata.updatesToSchedule,
+                updatesToCancel: metadata.updatesToCancel
+            )
+        case let (nil, metadata?):
+            return GestureOutputMetadata(
+                updatesToSchedule: metadata.updatesToSchedule,
+                updatesToCancel: metadata.updatesToCancel
+            )
+        case let (first?, second?):
+            return GestureOutputMetadata(
+                updatesToSchedule: first.updatesToSchedule + second.updatesToSchedule,
+                updatesToCancel: first.updatesToCancel + second.updatesToCancel
+            )
+        }
     }
 }
 
