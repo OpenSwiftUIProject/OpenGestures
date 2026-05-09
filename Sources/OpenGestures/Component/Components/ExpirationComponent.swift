@@ -179,6 +179,20 @@ package enum ExpirablePayload<Value: Sendable>: NestedCustomStringConvertible, S
 // MARK: - GestureOutput + ExpirationRecord
 
 extension GestureOutput {
+    package static func value(
+        _ value: Value,
+        isFinal: Bool,
+        expiration: Expiration?
+    ) -> GestureOutput<ExpirationRecord<Value>> {
+        .value(
+            ExpirationRecord(
+                payload: .value(value),
+                expiration: expiration
+            ),
+            isFinal: isFinal
+        )
+    }
+
     package func expired(
         with expiration: Expiration?
     ) -> GestureOutput<ExpirationRecord<Value>> {
