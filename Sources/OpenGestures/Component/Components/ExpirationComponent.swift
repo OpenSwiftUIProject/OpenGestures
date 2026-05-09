@@ -74,11 +74,11 @@ extension ExpirationComponent: ValueTransformingComponent {
         case let .empty(reason):
             return .empty(reason, metadata: metadata)
         case let .value(payload):
-            if isFinal {
-                return .finalValue(payload, metadata: metadata)
-            } else {
-                return .value(payload, metadata: metadata)
-            }
+            return .value(
+                payload,
+                isFinal: isFinal,
+                metadata: metadata
+            )
         }
     }
 

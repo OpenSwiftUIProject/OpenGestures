@@ -70,10 +70,6 @@ extension MovementGate: ValueTransformingComponent {
                 throw Failure.tooMuchMovement
             }
         }
-        if isFinal {
-            return .finalValue(value, metadata: nil)
-        } else {
-            return .value(value, metadata: nil)
-        }
+        return .value(value, isFinal: isFinal)
     }
 }

@@ -89,14 +89,10 @@ extension ThresholdComponent: ValueTransformingComponent {
                 )
             }
             state.adjustmentDelta = adjustmentDelta
-            return .value(adjustedValue, metadata: nil)
+            return .value(adjustedValue, isFinal: false)
         }
         var adjustedValue = value
         adjustedValue.vector -= adjustmentDelta
-        if isFinal {
-            return .finalValue(adjustedValue, metadata: nil)
-        } else {
-            return .value(adjustedValue, metadata: nil)
-        }
+        return .value(adjustedValue, isFinal: isFinal)
     }
 }

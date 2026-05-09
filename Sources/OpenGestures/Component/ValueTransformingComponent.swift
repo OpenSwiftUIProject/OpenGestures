@@ -37,10 +37,6 @@ extension ValueTransformingComponent where Value == Upstream.Value {
         isFinal: Bool,
         context: GestureComponentContext
     ) throws -> GestureOutput<Value> {
-        if isFinal {
-            return .finalValue(value, metadata: nil)
-        } else {
-            return .value(value, metadata: nil)
-        }
+        return .value(value, isFinal: isFinal)
     }
 }

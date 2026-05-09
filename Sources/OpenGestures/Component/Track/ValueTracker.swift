@@ -63,10 +63,6 @@ extension ValueTracker: ValueTransformingComponent {
             initial: state.initialValue!
         )
         state.previousValue = current
-        if isFinal {
-            return .finalValue(trackedValue, metadata: nil)
-        } else {
-            return .value(trackedValue, metadata: nil)
-        }
+        return .value(trackedValue, isFinal: isFinal)
     }
 }

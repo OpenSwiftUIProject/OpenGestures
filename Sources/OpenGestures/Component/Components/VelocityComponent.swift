@@ -79,11 +79,7 @@ extension VelocityComponent: ValueTransformingComponent {
         state.previousTime = context.currentTime
 
         let result = (value: value, velocity: velocity)
-        if isFinal {
-            return .finalValue(result, metadata: nil)
-        } else {
-            return .value(result, metadata: nil)
-        }
+        return .value(result, isFinal: isFinal)
     }
 
     private func makeRawVelocity(
@@ -127,10 +123,6 @@ extension VelocityComponent: ValueTransformingComponent {
         state.previousTime = currentTime
 
         let result = (value: value, velocity: velocity)
-        if isFinal {
-            return .finalValue(result, metadata: nil)
-        } else {
-            return .value(result, metadata: nil)
-        }
+        return .value(result, isFinal: isFinal)
     }
 }

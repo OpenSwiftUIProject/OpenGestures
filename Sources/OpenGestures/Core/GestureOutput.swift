@@ -53,6 +53,18 @@ extension GestureOutput {
             metadata
         }
     }
+
+    package static func value(
+        _ value: Value,
+        isFinal: Bool,
+        metadata: GestureOutputMetadata? = nil
+    ) -> Self {
+        if isFinal {
+            return .finalValue(value, metadata: metadata)
+        } else {
+            return .value(value, metadata: metadata)
+        }
+    }
 }
 
 // MARK: - GestureOutput + NestedCustomStringConvertible

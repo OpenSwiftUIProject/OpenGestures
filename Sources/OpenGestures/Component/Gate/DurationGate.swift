@@ -62,12 +62,10 @@ extension DurationGate: ValueTransformingComponent {
                 reason: "min duration expired"
             )
         } else {
-            let output: GestureOutput<Upstream.Value>
-            if isFinal {
-                output = .finalValue(value, metadata: nil)
-            } else {
-                output = .value(value, metadata: nil)
-            }
+            let output = GestureOutput<Upstream.Value>.value(
+                value,
+                isFinal: isFinal
+            )
             return Self.makeExpirationOutput(
                 output,
                 from: context.startTime,
