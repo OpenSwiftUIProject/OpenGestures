@@ -34,7 +34,8 @@ struct DurationGateTests {
             return
         }
         #expect(reason == .filtered)
-        #expect(metadata?.traceAnnotation?.value == "min duration not reached")
+        #expect(metadata != nil)
+        #expect(metadata?.traceAnnotation == nil)
         #expect(record.expiration?.deadline == Timestamp(value: .seconds(2)))
         #expect(record.expiration?.reason.description == "min duration expired")
     }

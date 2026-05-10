@@ -5,6 +5,8 @@
 //  Audited for 9126.1.5
 //  Status: Complete
 
+import OpenCoreGraphicsShims
+
 // MARK: - Interpolatable
 
 package protocol Interpolatable: Sendable {

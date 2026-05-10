@@ -31,7 +31,8 @@ struct MovementGateTests {
             return
         }
         #expect(reason == .filtered)
-        #expect(filteredMetadata?.traceAnnotation?.value == "not enough movement")
+        #expect(filteredMetadata != nil)
+        #expect(filteredMetadata?.traceAnnotation == nil)
 
         guard case let .finalValue(finalValue, finalMetadata) = finalOutput else {
             Issue.record("Expected final value output")

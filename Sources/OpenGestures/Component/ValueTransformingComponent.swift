@@ -28,7 +28,7 @@ extension ValueTransformingComponent {
             output.metadata = metadata
             return output
         case let .finalValue(value, metadata):
-            var output = try transform(value, isFinal: false, context: context)
+            var output = try transform(value, isFinal: true, context: context)
             output.metadata = metadata
             return output
         }

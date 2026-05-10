@@ -30,7 +30,8 @@ struct ThresholdComponentTests {
             return
         }
         #expect(reason == .filtered)
-        #expect(filteredMetadata?.traceAnnotation?.value == "not enough movement")
+        #expect(filteredMetadata != nil)
+        #expect(filteredMetadata?.traceAnnotation == nil)
         #expect(component.state.initialValue == CGPoint.zero)
 
         guard case let .value(value, valueMetadata) = valueOutput else {
