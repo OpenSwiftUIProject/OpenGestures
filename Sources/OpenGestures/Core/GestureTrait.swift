@@ -188,8 +188,10 @@ extension GestureTraitCollection: NestedCustomStringConvertible {
 // MARK: - GestureTraitCollection + Mergeable
 
 extension GestureTraitCollection: Mergeable {
-    package mutating func merge(_ other: GestureTraitCollection) {
-        _traits.merge(other._traits) { $1 }
+    package func merging(_ other: GestureTraitCollection) -> GestureTraitCollection {
+        var result = self
+        result._traits.merge(other._traits) { $1 }
+        return result
     }
 }
 
