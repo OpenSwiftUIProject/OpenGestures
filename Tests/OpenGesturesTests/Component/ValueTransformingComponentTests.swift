@@ -53,14 +53,16 @@ struct ValueTransformingComponentTests {
             return
         }
         #expect(reason == .filtered)
-        #expect(valueMetadata?.traceAnnotation?.value == "not final event")
+        #expect(valueMetadata != nil)
+        #expect(valueMetadata?.traceAnnotation == nil)
 
         guard case let .finalValue(finalValue, finalMetadata) = finalOutput else {
             Issue.record("Expected final value output")
             return
         }
         #expect(finalValue == 5)
-        #expect(finalMetadata == nil)
+        #expect(finalMetadata != nil)
+        #expect(finalMetadata?.traceAnnotation == nil)
     }
 
     @Test
