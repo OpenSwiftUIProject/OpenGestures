@@ -36,7 +36,7 @@ extension GestureOutput {
     }
 }
 
-// MARK: - GestureOutputArrayCombiner [WIP: DynamicCombinerComponent]
+// MARK: - GestureOutputArrayCombiner
 
 package struct GestureOutputArrayCombiner<Value: Sendable>: Sendable {
     package let statusCombiner: GestureOutputStatusCombiner
@@ -45,42 +45,37 @@ package struct GestureOutputArrayCombiner<Value: Sendable>: Sendable {
         self.statusCombiner = statusCombiner
     }
 
-//    package func combine(_ outputs: [GestureOutput<Value>]) throws -> GestureOutput<[A]> {
-//        let status = try statusCombiner.combine(outputs.map(\.status))
-//        let metadata = combinedMetadata(for: outputs)
-//        switch status {
-//        case .empty:
-//            return .empty(emptyReason(for: outputs), metadata: metadata)
-//        case .value:
-//            return .value(outputs.compactMap(\.value), metadata: metadata)
-//        case .finalValue:
-//            return .finalValue(outputs.compactMap(\.value), metadata: metadata)
-//        }
-//    }
-//
-//    private func emptyReason(for outputs: [GestureOutput<Value>]) -> GestureOutputEmptyReason {
-//        for output in outputs {
-//            if let reason = output.emptyReason {
-//                return reason
-//            }
-//        }
-//        return .noData
-//    }
-//
-//    private func combinedMetadata(for outputs: [GestureOutput<Value>]) -> GestureOutputMetadata? {
-//        let metadata = outputs.compactMap(\.metadata)
-//        let updatesToSchedule = metadata.flatMap { $0.updatesToSchedule }
-//        let updatesToCancel = metadata.flatMap { $0.updatesToCancel }
-//        let traceAnnotation = metadata.compactMap { $0.traceAnnotation }.last
-//        guard !updatesToSchedule.isEmpty || !updatesToCancel.isEmpty || traceAnnotation != nil else {
-//            return nil
-//        }
-//        return GestureOutputMetadata(
-//            updatesToSchedule: updatesToSchedule,
-//            updatesToCancel: updatesToCancel,
-//            traceAnnotation: traceAnnotation
-//        )
-//    }
+    package func combine(_ outputs: [GestureOutput<Value>]) throws -> GestureOutput<[Value]> {
+        var statuses: [GestureOutputStatus] = []
+        var values: [Value] = []
+        var metadata: GestureOutputMetadata?
+        var emptyReason: GestureOutputEmptyReason?
+        var lastOutputEmptyReason: GestureOutputEmptyReason?
+        var hasProcessedOutput = false
+        var hasPriorOutput = false
+        for output in outputs {
+            hasPriorOutput = hasProcessedOutput
+            if let value = output.value {
+                values.append(value)
+            }
+            statuses.append(output.status)
+            metadata = GestureOutputMetadata.combineUpdateRequests(metadata, output.metadata)
+            lastOutputEmptyReason = output.emptyReason
+            hasProcessedOutput = true
+        }
+        if hasProcessedOutput {
+            emptyReason = hasPriorOutput || lastOutputEmptyReason != nil ? .filtered : .noData
+        }
+        let status = try statusCombiner.combine(statuses)
+        switch status {
+        case .empty:
+            return .empty(emptyReason!, metadata: metadata)
+        case .value:
+            return .value(values, metadata: metadata)
+        case .finalValue:
+            return .finalValue(values, metadata: metadata)
+        }
+    }
 }
 
 // MARK: - GestureOutputCombiner
@@ -106,28 +101,16 @@ package struct GestureOutputCombiner<each Value: Sendable, Output: Sendable>: Se
         var emptyReason: GestureOutputEmptyReason?
         var lastOutputEmptyReason: GestureOutputEmptyReason?
         var hasProcessedOutput = false
-
+        var hasPriorOutput = false
         for output in repeat each outputs {
+            hasPriorOutput = hasProcessedOutput
             statuses.append(output.status)
-            switch (metadata, output.metadata) {
-            case let (current?, outputMetadata?):
-                metadata = GestureOutputMetadata(
-                    updatesToSchedule: current.updatesToSchedule + outputMetadata.updatesToSchedule,
-                    updatesToCancel: current.updatesToCancel + outputMetadata.updatesToCancel
-                )
-            case let (nil, outputMetadata?):
-                metadata = GestureOutputMetadata(
-                    updatesToSchedule: outputMetadata.updatesToSchedule,
-                    updatesToCancel: outputMetadata.updatesToCancel
-                )
-            case (_, nil):
-                break
-            }
+            metadata = GestureOutputMetadata.combineUpdateRequests(metadata, output.metadata)
             lastOutputEmptyReason = output.emptyReason
             hasProcessedOutput = true
         }
         if hasProcessedOutput {
-            emptyReason = lastOutputEmptyReason != nil ? .filtered : .noData
+            emptyReason = hasPriorOutput || lastOutputEmptyReason != nil ? .filtered : .noData
         }
         let status = try statusCombiner.combine(statuses)
         switch status {
