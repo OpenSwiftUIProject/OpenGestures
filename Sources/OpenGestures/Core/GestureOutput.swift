@@ -54,6 +54,17 @@ extension GestureOutput {
         }
     }
 
+    package func copyClearingMetadata() -> Self {
+        switch self {
+        case let .empty(reason, _):
+            return .empty(reason, metadata: nil)
+        case let .value(value, _):
+            return .value(value, metadata: nil)
+        case let .finalValue(value, _):
+            return .finalValue(value, metadata: nil)
+        }
+    }
+
     package func copyWithCombinedMetadata(_ other: GestureOutputMetadata?) -> Self {
         switch self {
         case let .empty(reason, metadata):
